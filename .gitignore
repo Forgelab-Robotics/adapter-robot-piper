@@ -1,0 +1,16 @@
+# Dora / runtime generated outputs
+out/
+**/out/
+
+# Local scratch files
+.tmp/
+*.log
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Runtime recordings
+logs/
+**/logs/
+*.mcap

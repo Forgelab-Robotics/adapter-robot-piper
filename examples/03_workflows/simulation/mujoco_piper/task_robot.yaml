@@ -1,0 +1,34 @@
+# 与 simulator.yaml 的 joints / robots 映射保持一致
+joints:
+  - { name: joint1, mode: position, unit: radians }
+  - { name: joint2, mode: position, unit: radians }
+  - { name: joint3, mode: position, unit: radians }
+  - { name: joint4, mode: position, unit: radians }
+  - { name: joint5, mode: position, unit: radians }
+  - { name: joint6, mode: position, unit: radians }
+  - { name: gripper, mode: prismatic, unit: millimeters }
+
+robots:
+  - id: robot_0
+    actuator_order:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+      - gripper
+    joint_to_actuator:
+      joint1: joint1
+      joint2: joint2
+      joint3: joint3
+      joint4: joint4
+      joint5: joint5
+      joint6: joint6
+      gripper: gripper
+
+image_forward:
+  image/hand: image/hand
+  image/top: image/top
+  image/angle: image/angle
+  image/left_pillar: image/left_pillar

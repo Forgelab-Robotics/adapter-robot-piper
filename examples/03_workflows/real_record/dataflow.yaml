@@ -1,0 +1,57 @@
+# 真实摄像头采集 + 录制 MCAP 示例
+# 运行：在 examples/real_record 目录下
+#   dora build dataflow.yaml --uv && dora run dataflow.yaml --uv
+#
+# 数据流：piper_master(state) 驱动 piper_slave；task_robot 将 master_state 转为 action 供 mcap_recorder 录制（observation + action）。
+
+nodes:
+  - id: camera_hand
+    path: ../../../../../forge_runtime/target/release/forge-runtime-camera
+    inputs:
+      tick: dora/timer/millis/33     # ≈30Hz，相机采样频率
+    outputs:
+      - image
+    args: --config camera.yaml
+
+  - id: piper_master
+    path: ../../../src/robots_piper/main.py
+    inputs:
+      tick: dora/timer/millis/20
+    outputs:
+      - state
+    args: --config piper_master.yaml
+  
+  - id: piper_slave
+    path: ../../../src/robots_piper/main.py
+    inputs:
+      master_state: piper_master/state
+      tick: dora/timer/millis/20
+    outputs:
+      - state
+    args: --config piper_slave.yaml
+
+  - id: mcap_recorder
+    path: ../../../../../forge_runtime/packages/nodes/recorders/mcap_recorder/main.py
+    args: --fps 30 --min-ready-topics 3 --jpeg-quality 80 --output ./logs/real_record.mcap --auto-start
+    inputs:
+      proprio_state: task_robot/proprio_state
+      action: task_robot/action
+      image/hand: task_robot/image/hand
+
+  - id: image_viewer
+    path: ../../../../../forge_runtime/packages/nodes/viewers/image_viewer/main.py
+    inputs:
+      image/hand: task_robot/image/hand
+
+  - id: task_robot
+    path: ../../../../../forge_runtime/packages/nodes/task_robot/main.py
+    inputs:
+      tick: dora/timer/millis/20
+      robot_0/state: piper_slave/state
+      robot_0/master_state: piper_master/state
+      image/hand: camera_hand/image
+    outputs:
+      - action
+      - proprio_state
+      - image/hand
+    args: --config task_robot.yaml

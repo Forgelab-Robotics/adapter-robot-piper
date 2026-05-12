@@ -1,0 +1,5 @@
+# Piper master 模式配置示例
+# 用于只读主臂状态，典型来源：forge_runtime/examples/real_record/piper_master.yaml
+
+port: can1
+is_follower: false

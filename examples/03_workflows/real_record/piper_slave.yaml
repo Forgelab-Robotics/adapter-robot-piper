@@ -1,0 +1,10 @@
+## Piper 真机节点配置示例（real_record）
+# 复制或直接修改本文件，以匹配现场的 Piper 机械臂与 CAN 端口。
+# 该配置会被 examples/real_record/dataflow.yaml 中的 piper 节点引用。
+
+# 实际使用的 CAN 端口，如 can0、can1
+port: can0
+
+
+is_follower: true
+

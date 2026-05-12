@@ -1,0 +1,83 @@
+# 仿真 + 推理 + 录制 示例
+# 运行：在 examples/sim_inference_record 目录下
+#   dora build dataflow.yaml --uv && dora run dataflow.yaml --uv
+#
+# 数据流：piper_master(state) 驱动 mujoco；task_robot 将 master_state 转为 action 供 mcap_recorder 录制。
+# 录制由 recorder_control 控制：首 tick 发 start（可带路径），第 N 个 tick 发 stop；mcap_recorder 常驻可重复录制，dataflow 用 Ctrl+C 结束。
+
+nodes:
+  - id: mujoco
+    path: ../../../../../forge_runtime/packages/nodes/simulators/mujoco/main.py
+    inputs:
+      tick: dora/timer/millis/20
+      robot_0/master_state: piper_master/state
+      sim_control: control_gateway/sim_control
+    outputs:
+      - proprio_state
+      - image/hand
+      - image/top
+      - image/angle
+      - image/left_pillar
+      - sim_status
+    args: --config simulator.yaml
+
+  - id: task_robot
+    path: ../../../../../forge_runtime/packages/nodes/task_robot/main.py
+    inputs:
+      tick: dora/timer/millis/20
+      proprio_state: mujoco/proprio_state
+      robot_0/master_state: piper_master/state
+      image/hand: mujoco/image/hand
+      image/top: mujoco/image/top
+      image/angle: mujoco/image/angle
+      image/left_pillar: mujoco/image/left_pillar
+      sim_control: control_gateway/sim_control
+    outputs:
+      - action
+      - proprio_state
+      - image/hand
+      - image/top
+      - image/angle
+      - image/left_pillar
+    args: --config task_robot.yaml
+
+  - id: control_gateway
+    path: ../../../../../forge_runtime/packages/nodes/control_gateway/main.py
+    inputs:
+      sim_status: mujoco/sim_status
+      record_status: mcap_recorder/record_status
+    outputs:
+      - sim_control
+      - start_recording
+      - stop_recording
+
+  - id: mcap_recorder
+    path: ../../../../../forge_runtime/packages/nodes/recorders/mcap_recorder/main.py
+    args: --fps 50 --min-ready-topics 6 --jpeg-quality 75 --output ./logs/recording.mcap --auto-start
+    inputs:
+      start_recording: control_gateway/start_recording
+      stop_recording: control_gateway/stop_recording
+      proprio_state: task_robot/proprio_state
+      action: task_robot/action
+      image/hand: task_robot/image/hand
+      image/top: task_robot/image/top
+      image/angle: task_robot/image/angle
+      image/left_pillar: task_robot/image/left_pillar
+    outputs:
+      - record_status
+
+  - id: image_viewer
+    path: ../../../../../forge_runtime/packages/nodes/viewers/image_viewer/main.py
+    inputs:
+      image/hand: task_robot/image/hand
+      image/top: task_robot/image/top
+      image/angle: task_robot/image/angle
+      image/left_pillar: task_robot/image/left_pillar
+  
+  - id: piper_master
+    path: ../../../src/robots_piper/main.py
+    inputs:
+      tick: dora/timer/millis/20
+    outputs:
+      - state
+    args: --config piper_master.yaml

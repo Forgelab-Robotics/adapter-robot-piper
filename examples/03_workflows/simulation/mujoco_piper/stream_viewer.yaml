@@ -1,0 +1,16 @@
+# 与 simulator / task_robot 的 joint_order、图像 output id 一致
+joint_order:
+  - joint1
+  - joint2
+  - joint3
+  - joint4
+  - joint5
+  - joint6
+  - gripper
+image_input_ids:
+  - image/hand
+  - image/top
+  - image/angle
+  - image/left_pillar
+port: 8771
+broadcast_hz: 24
