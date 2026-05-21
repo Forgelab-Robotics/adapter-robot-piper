@@ -9,10 +9,56 @@ from typing import Any
 
 import yaml
 
+from forge_robot import ActuatorSpec, actuator_order
+
+PIPER_ACTUATOR_SPECS = (
+    ActuatorSpec(
+        name="joint1",
+        kind="revolute",
+        min_position=-2.618,
+        max_position=2.618,
+    ),
+    ActuatorSpec(
+        name="joint2",
+        kind="revolute",
+        min_position=0.0,
+        max_position=3.140,
+    ),
+    ActuatorSpec(
+        name="joint3",
+        kind="revolute",
+        min_position=-2.967,
+        max_position=0.0,
+    ),
+    ActuatorSpec(
+        name="joint4",
+        kind="revolute",
+        min_position=-1.745,
+        max_position=1.745,
+    ),
+    ActuatorSpec(
+        name="joint5",
+        kind="revolute",
+        min_position=-1.320,
+        max_position=1.320,
+    ),
+    ActuatorSpec(
+        name="joint6",
+        kind="revolute",
+        min_position=-2.094,
+        max_position=2.094,
+    ),
+    ActuatorSpec(
+        name="gripper",
+        kind="prismatic",
+        position_unit="millimeters",
+        min_position=0.0,
+        max_position=105.0,
+    ),
+)
+
 # 与 driver 中关节/夹爪顺序一致，固定不可配置
-PIPER_ACTUATOR_ORDER = [
-    "joint1", "joint2", "joint3", "joint4", "joint5", "joint6", "gripper"
-]
+PIPER_ACTUATOR_ORDER = actuator_order(PIPER_ACTUATOR_SPECS)
 
 
 @dataclass

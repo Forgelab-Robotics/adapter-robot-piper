@@ -9,8 +9,18 @@ out/
 # Python caches
 __pycache__/
 *.py[cod]
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
 
-# Runtime recordings
+# Virtual environments
+.venv
+
+# Runtime recordings and temporary execution outputs
 logs/
 **/logs/
 *.mcap
+
+bin/

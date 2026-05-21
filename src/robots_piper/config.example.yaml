@@ -1,7 +1,0 @@
-# Piper 节点配置示例
-# 复制为 config.yaml 并根据实际环境修改
-# CAN 端口，如 can0、can1
-port: can0
-
-# 是否为从臂模式，默认 true
-is_follower: true

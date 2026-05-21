@@ -1,4 +1,4 @@
-"""Piper 机械臂硬件驱动，实现 robot_core.RobotDriver 协议。"""
+"""Piper 机械臂硬件驱动，实现 forge_robot.BaseRobotDriver 协议。"""
 
 from __future__ import annotations
 
@@ -8,40 +8,14 @@ from typing import Literal
 
 from forge_msgs import ActuatorValue, RobotAction, RobotState
 from piper_sdk import C_PiperInterface_V2
-from robot_core import BaseRobotDriver
+from forge_robot import BaseRobotDriver, clip_and_validate_position_action, specs_by_name
 
-from config import PIPER_ACTUATOR_ORDER
+from robots_piper.config import PIPER_ACTUATOR_ORDER, PIPER_ACTUATOR_SPECS
 from forge_common import get_logger
 
 logger = get_logger(__name__)
 
-# 关节/夹爪限位，用于 set_actuators 前裁剪
-_ACTUATOR_LIMITS: dict[str, tuple[float, float]] = {
-    "joint1": (-2.618, 2.618),
-    "joint2": (0, 3.140),
-    "joint3": (-2.967, 0),
-    "joint4": (-1.745, 1.745),
-    "joint5": (-1.320, 1.320),
-    "joint6": (-2.094, 2.094),
-    "gripper": (0.0, 105.0),
-}
-
-
-def _get_safe_action(action: RobotAction) -> RobotAction:
-    """将 action 中各执行器值裁剪到限位内。"""
-    safe_actuators = {}
-    for name, act_val in action.actuators.items():
-        limits = _ACTUATOR_LIMITS.get(name)
-        if limits is None:
-            continue
-        lo, hi = limits
-        clipped = max(min(act_val.value, hi), lo)
-        safe_actuators[name] = ActuatorValue(
-            value=clipped,
-            mode=act_val.mode,
-            unit=act_val.unit,
-        )
-    return RobotAction(actuators=safe_actuators)
+_ACTUATOR_SPECS_DICT = specs_by_name(PIPER_ACTUATOR_SPECS)
 
 
 class PiperDriver(BaseRobotDriver):
@@ -254,7 +228,7 @@ class PiperDriver(BaseRobotDriver):
         if self.bus is None:
             raise RuntimeError("Robot is not connected. Call connect() first.")
 
-        safe_action = _get_safe_action(action)
+        safe_action = clip_and_validate_position_action(action, _ACTUATOR_SPECS_DICT)
         action_dict = {name: act.value for name, act in safe_action.actuators.items()}
 
         j1 = int(math.degrees(action_dict.get("joint1", 0.0)) * self.ANGLE_SCALE)

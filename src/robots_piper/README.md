@@ -44,18 +44,19 @@ path: ../../../src/robots_piper/main.py
 | 子命令 | 说明 |
 |--------|------|
 | `run --config ...` 或无子命令 | 运行 dora 节点 |
-| `gripper-cycle [PORT] [-d SEC]` | 夹爪循环，确认端口与机械臂对应 |
-| `list-ports` | 列出 CAN 接口 |
-| `activate-ports` | 激活所有 CAN 接口（需权限） |
-| `check-role` | 主从检测 |
+| `test [DEVICE] [-d SEC]` | 夹爪循环，确认设备与机械臂对应 |
+| `list-devices` | 列出 CAN 接口 |
+| `activate-devices` | 激活所有 CAN 接口（需权限） |
+| `check-role` | 主从检测（Piper 专用） |
+| `set-role DEVICE ROLE` | 设置主/从臂（Piper 专用） |
 
 示例：
 
 ```bash
-cd robots/piper/src/robots_piper
-uv run python main.py list-ports --json
-uv run python main.py check-role can0 can1 --json
-uv run python main.py gripper-cycle can0 --duration 15
+cd agilex_piper
+uv run robots-piper list-devices --json
+uv run robots-piper check-role can0 can1 --json
+uv run robots-piper test can0 --duration 15
 ```
 
 ## 打包

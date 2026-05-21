@@ -4,6 +4,6 @@
 
 `src/robots_piper/`
 
-来源为工作区内 `forge_robots/packages/piper/`，主要文件包括 `main.py`、`driver.py`、`config.py`、`config.example.yaml`、`piper_ports.py`、`robot_piper.spec` 与 `build_pyinstaller.sh`。
+来源为工作区内 `forge_robots/packages/piper/`，主要文件包括 `main.py`、`driver.py`、`config.py`、`device_tools.py`、`robots_piper.spec` 与 `build_pyinstaller.sh`。
 
 本仓 `examples/03_workflows/real_record/`、`real_playback/`、`sim_record/` 中的 Piper 节点路径均指向该本地源码。若后续更新上游实现，请同步迁入本目录并在提交 / MR 中记录来源 commit。
