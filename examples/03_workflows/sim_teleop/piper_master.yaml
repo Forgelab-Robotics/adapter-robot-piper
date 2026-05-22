@@ -3,7 +3,7 @@
 # 该配置会被 examples/real_record/dataflow.yaml 中的 piper 节点引用。
 
 # 实际使用的 CAN 端口，如 can0、can1
-port: can1
+port: can0
 
 # real_record 示例推荐以 master 模式工作，仅按 tick 轮询状态并输出，不通过 action 控制
 is_follower: false
