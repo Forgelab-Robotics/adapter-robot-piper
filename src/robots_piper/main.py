@@ -33,7 +33,7 @@ def _run_node(config_path: str | None) -> int:
     )
     return run_dora_robot_node(
         driver,
-        actuator_order=driver.actuator_order,
+        joint_order=driver.joint_order,
         is_follower=bool(getattr(config, "is_follower", True)),
         debug=bool(getattr(config, "debug", False)),
     )

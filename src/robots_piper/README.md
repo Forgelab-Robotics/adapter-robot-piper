@@ -1,6 +1,6 @@
 # Piper 节点
 
-基于 dora-rs 的 Piper 机器人节点：订阅 TaskRobot 下发的 `RobotAction`，通过 Piper 底层 SDK / CAN 与硬件交互，将读到的状态以 `RobotState` 输出，供 TaskRobot 聚合为 `ProprioState`。
+基于 dora-rs 的 Piper 机器人节点：订阅 TaskRobot 下发的 `JointCommand`，通过 Piper 底层 SDK / CAN 与硬件交互，将读到的状态以 `JointState` 输出，供 TaskRobot 聚合为 `proprio_state`。
 
 ## 位置
 
@@ -62,11 +62,11 @@ uv run robots-piper test can0 --duration 15
 ## 打包
 
 ```bash
-cd robots/piper/src/robots_piper
-./build_pyinstaller.sh
+cd agilex_piper
+./scripts/build_pyinstaller.sh
 ```
 
-产物默认在 `src/robots_piper/dist/robot_piper`。
+产物默认在 `dist/robots_piper`。
 
 ## 关节顺序
 

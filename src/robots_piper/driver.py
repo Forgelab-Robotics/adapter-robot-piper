@@ -6,9 +6,9 @@ import math
 import time
 from typing import Literal
 
-from forge_msgs import ActuatorValue, RobotAction, RobotState
+from forge_msgs import JointCommand, JointState
 from piper_sdk import C_PiperInterface_V2
-from forge_robot import BaseRobotDriver, clip_and_validate_position_action, specs_by_name
+from forge_robot import BaseRobotDriver, clip_and_validate_position_command, specs_by_name
 
 from robots_piper.config import PIPER_ACTUATOR_ORDER, PIPER_ACTUATOR_SPECS
 from forge_common import get_logger
@@ -27,7 +27,7 @@ class PiperDriver(BaseRobotDriver):
     """
 
     @property
-    def actuator_order(self) -> list[str]:
+    def joint_order(self) -> list[str]:
         return list(PIPER_ACTUATOR_ORDER)
 
     ANGLE_SCALE = 1000.0
@@ -55,7 +55,7 @@ class PiperDriver(BaseRobotDriver):
         self.port = port
         self.bus: C_PiperInterface_V2 | None = None
         # Leader 模式下 get_state 不是总有数据，全 0 视为无效，用缓存
-        self._state_cache: RobotState | None = None
+        self._state_cache: JointState | None = None
 
         if auto_connect:
             self.connect()
@@ -156,8 +156,8 @@ class PiperDriver(BaseRobotDriver):
         logger.info("Homing command sent.")
         time.sleep(1)
 
-    def get_state(self) -> RobotState:
-        """从硬件读取状态，转为 RobotState（弧度/毫米）。Leader 模式下全 0 视为无效，返回缓存。"""
+    def get_state(self) -> JointState:
+        """从硬件读取状态，转为 JointState（弧度/毫米）。Leader 模式下全 0 视为无效，返回缓存。"""
         if self.bus is None:
             raise RuntimeError("Robot is not connected. Call connect() first.")
 
@@ -181,55 +181,31 @@ class PiperDriver(BaseRobotDriver):
                     return self._state_cache
                 # 无缓存时仍返回全 0 的 state，避免调用方报错
 
-        actuator_values = {
-            "joint1": ActuatorValue(
-                value=math.radians(joints.joint_1 / self.ANGLE_SCALE),
-                mode="position",
-                unit="radians",
-            ),
-            "joint2": ActuatorValue(
-                value=math.radians(joints.joint_2 / self.ANGLE_SCALE),
-                mode="position",
-                unit="radians",
-            ),
-            "joint3": ActuatorValue(
-                value=math.radians(joints.joint_3 / self.ANGLE_SCALE),
-                mode="position",
-                unit="radians",
-            ),
-            "joint4": ActuatorValue(
-                value=math.radians(joints.joint_4 / self.ANGLE_SCALE),
-                mode="position",
-                unit="radians",
-            ),
-            "joint5": ActuatorValue(
-                value=math.radians(joints.joint_5 / self.ANGLE_SCALE),
-                mode="position",
-                unit="radians",
-            ),
-            "joint6": ActuatorValue(
-                value=math.radians(joints.joint_6 / self.ANGLE_SCALE),
-                mode="position",
-                unit="radians",
-            ),
-            "gripper": ActuatorValue(
-                value=gripper.grippers_angle / self.GRIPPER_SCALE,
-                mode="position",
-                unit="millimeters",
-            ),
-        }
-        state = RobotState(actuators=actuator_values)
+        state = JointState(
+            name=self.joint_order,
+            position=[
+                math.radians(joints.joint_1 / self.ANGLE_SCALE),
+                math.radians(joints.joint_2 / self.ANGLE_SCALE),
+                math.radians(joints.joint_3 / self.ANGLE_SCALE),
+                math.radians(joints.joint_4 / self.ANGLE_SCALE),
+                math.radians(joints.joint_5 / self.ANGLE_SCALE),
+                math.radians(joints.joint_6 / self.ANGLE_SCALE),
+                gripper.grippers_angle / self.GRIPPER_SCALE,
+            ],
+        )
         if not self.is_follower:
             self._state_cache = state
         return state
 
-    def set_actuators(self, action: RobotAction) -> None:
-        """下发 RobotAction（弧度/毫米），内部会裁剪到限位。"""
+    def set_command(self, command: JointCommand) -> None:
+        """下发 JointCommand（弧度/毫米），内部会裁剪到限位。"""
         if self.bus is None:
             raise RuntimeError("Robot is not connected. Call connect() first.")
 
-        safe_action = clip_and_validate_position_action(action, _ACTUATOR_SPECS_DICT)
-        action_dict = {name: act.value for name, act in safe_action.actuators.items()}
+        safe_command = clip_and_validate_position_command(command, _ACTUATOR_SPECS_DICT)
+        action_dict = dict(
+            zip(safe_command.name, safe_command.position, strict=False)
+        )
 
         j1 = int(math.degrees(action_dict.get("joint1", 0.0)) * self.ANGLE_SCALE)
         j2 = int(math.degrees(action_dict.get("joint2", 0.0)) * self.ANGLE_SCALE)
