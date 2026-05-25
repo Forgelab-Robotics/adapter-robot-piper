@@ -21,8 +21,8 @@ robots_piper = "robots_piper.main:main"
 
 [tool.uv.sources]
 forge-common = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "dev", subdirectory = "packages/common" }
-forge-msgs = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "refactor/msg", subdirectory = "packages/msgs" }
-forge-robot = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "refactor/msg", subdirectory = "packages/robot" }
+forge-msgs = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "dev", subdirectory = "packages/msgs" }
+forge-robot = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "dev", subdirectory = "packages/robot" }
 
 [project.optional-dependencies]
 pyinstaller = ["pyinstaller>=6.0"]

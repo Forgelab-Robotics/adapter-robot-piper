@@ -26,8 +26,8 @@ pyinstaller = [
 requires-dist = [
     { name = "dora-rs", specifier = ">=0.4.1" },
     { name = "forge-common", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fcommon&rev=dev" },
-    { name = "forge-msgs", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=refactor%2Fmsg" },
-    { name = "forge-robot", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=refactor%2Fmsg" },
+    { name = "forge-msgs", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=dev" },
+    { name = "forge-robot", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=dev" },
     { name = "piper-sdk", specifier = ">=0.6.1" },
     { name = "pyinstaller", marker = "extra == 'pyinstaller'", specifier = ">=6.0" },
     { name = "python-can", specifier = ">=4.0" },
@@ -114,7 +114,7 @@ source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirect
 [[package]]
 name = "forge-msgs"
 version = "0.1.0"
-source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=refactor%2Fmsg#9e90d828a299b8b3ea799444c3c423bbaa448ee3" }
+source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=dev#3f4762a5eca59f4b7eccc861b48d99d4a4e7e38f" }
 dependencies = [
     { name = "numpy" },
     { name = "pillow" },
@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "forge-robot"
 version = "0.1.0"
-source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=refactor%2Fmsg#9e90d828a299b8b3ea799444c3c423bbaa448ee3" }
+source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=dev#3f4762a5eca59f4b7eccc861b48d99d4a4e7e38f" }
 dependencies = [
     { name = "dora-rs" },
     { name = "forge-msgs" },
