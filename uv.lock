@@ -109,12 +109,12 @@ wheels = [
 [[package]]
 name = "forge-common"
 version = "0.1.0"
-source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fcommon&rev=dev#51cf55f47af148807a54f0e394181a122e428e4c" }
+source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fcommon&rev=dev#83be2093b80310c438fa8f1d0d9a593123469d7d" }
 
 [[package]]
 name = "forge-msgs"
 version = "0.1.0"
-source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=dev#51cf55f47af148807a54f0e394181a122e428e4c" }
+source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=dev#83be2093b80310c438fa8f1d0d9a593123469d7d" }
 dependencies = [
     { name = "numpy" },
     { name = "pillow" },
@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "forge-robot"
 version = "0.1.0"
-source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=dev#51cf55f47af148807a54f0e394181a122e428e4c" }
+source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=dev#83be2093b80310c438fa8f1d0d9a593123469d7d" }
 dependencies = [
     { name = "dora-rs" },
     { name = "forge-msgs" },
