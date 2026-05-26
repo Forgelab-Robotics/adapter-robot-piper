@@ -9,7 +9,7 @@ from typing import Any
 
 import yaml
 
-from forge_robot import ActuatorSpec, joint_order
+from forge_robot import ActuatorSpec
 
 PIPER_ACTUATOR_SPECS = (
     ActuatorSpec(
@@ -58,7 +58,7 @@ PIPER_ACTUATOR_SPECS = (
 )
 
 # 与 driver 中关节/夹爪顺序一致，固定不可配置
-PIPER_ACTUATOR_ORDER = joint_order(PIPER_ACTUATOR_SPECS)
+PIPER_ACTUATOR_ORDER = [spec.name for spec in PIPER_ACTUATOR_SPECS]
 
 
 @dataclass
