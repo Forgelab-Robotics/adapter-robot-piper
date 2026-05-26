@@ -54,7 +54,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name="robots_piper",
+    name="robots_agilex_piper",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

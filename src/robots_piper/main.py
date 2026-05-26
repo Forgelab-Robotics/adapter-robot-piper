@@ -11,7 +11,7 @@ from forge_common import get_logger
 logger = get_logger(__name__)
 
 app = typer.Typer(
-    name="robots_piper",
+    name="robots_agilex_piper",
     help="Piper 机械臂 dora 节点与 CAN 设备工具。无子命令时默认运行节点；"
     "可用 run / test / list-devices / activate-devices / check-role / set-role。",
     no_args_is_help=False,

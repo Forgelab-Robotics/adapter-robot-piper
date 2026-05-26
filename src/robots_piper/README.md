@@ -66,7 +66,7 @@ cd agilex_piper
 ./scripts/build_pyinstaller.sh
 ```
 
-产物默认在 `dist/robots_piper`。
+产物默认在 `dist/robots_agilex_piper`。
 
 ## 关节顺序
 
