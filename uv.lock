@@ -25,9 +25,9 @@ pyinstaller = [
 [package.metadata]
 requires-dist = [
     { name = "dora-rs", specifier = ">=0.4.1" },
-    { name = "forge-common", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fcommon&rev=dev" },
-    { name = "forge-msgs", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=dev" },
-    { name = "forge-robot", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=dev" },
+    { name = "forge-common", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fcommon&rev=v2.0.0" },
+    { name = "forge-msgs", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=v2.0.0" },
+    { name = "forge-robot", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=v2.0.0" },
     { name = "piper-sdk", specifier = ">=0.6.1" },
     { name = "pyinstaller", marker = "extra == 'pyinstaller'", specifier = ">=6.0" },
     { name = "python-can", specifier = ">=4.0" },
@@ -109,12 +109,12 @@ wheels = [
 [[package]]
 name = "forge-common"
 version = "0.1.0"
-source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fcommon&rev=dev#83be2093b80310c438fa8f1d0d9a593123469d7d" }
+source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fcommon&rev=v2.0.0#ec5fa5362340819f4eb62aecd67c632524942eff" }
 
 [[package]]
 name = "forge-msgs"
 version = "0.1.0"
-source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=dev#83be2093b80310c438fa8f1d0d9a593123469d7d" }
+source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&rev=v2.0.0#ec5fa5362340819f4eb62aecd67c632524942eff" }
 dependencies = [
     { name = "numpy" },
     { name = "pillow" },
@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "forge-robot"
 version = "0.1.0"
-source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=dev#83be2093b80310c438fa8f1d0d9a593123469d7d" }
+source = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&rev=v2.0.0#ec5fa5362340819f4eb62aecd67c632524942eff" }
 dependencies = [
     { name = "dora-rs" },
     { name = "forge-msgs" },
