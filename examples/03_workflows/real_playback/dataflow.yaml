@@ -2,9 +2,9 @@
 # 运行：在 examples/real_playback 目录下
 #   dora build dataflow.yaml --uv && dora run dataflow.yaml --uv
 #
-# 数据流：mcap_playback 读取 MCAP 的 action 并输出；task_robot 将 action 转为 robot action 下发到 piper_slave。
+# 数据流：mcap_playback 读取 MCAP 的 action 并输出；task_robot 将 action 转为 robot action 下发到 agilex_piper_slave。
 # 通过 control_gateway 的 POST /playback/control（START/PAUSE/RESUME/RESET）与 GET /playback/status 控制。
-# 配置需与录制时一致；本示例使用同目录下 task_robot.yaml、piper_slave.yaml。
+# 配置需与录制时一致；本示例使用同目录下 task_robot.yaml、agilex_piper_slave.yaml。
 
 nodes:
   - id: mcap_playback
@@ -26,14 +26,14 @@ nodes:
       - robot_0/action
     args: --config task_robot.yaml
 
-  - id: piper_slave
-    path: ../../../src/robots_piper/main.py
+  - id: agilex_piper_slave
+    path: ../../../src/robots_agilex_piper/main.py
     inputs:
       action: task_robot/robot_0/action
       tick: dora/timer/millis/20
     outputs:
       - state
-    args: --config piper_slave.yaml
+    args: --config agilex_piper_slave.yaml
 
   - id: control_gateway
     path: ../../../../../forge_runtime/packages/nodes/control_gateway/main.py

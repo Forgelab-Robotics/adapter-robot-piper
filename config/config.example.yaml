@@ -1,4 +1,4 @@
-# Piper 节点配置示例
+# Agilex Piper 节点配置示例
 # 复制为 config.yaml 并根据实际环境修改
 
 # CAN 设备，如 can0、can1（可用 list-devices 查看）

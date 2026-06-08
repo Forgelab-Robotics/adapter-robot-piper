@@ -1,5 +1,5 @@
-#! test_action_source 驱动 task_robot + mujoco（Piper）
-#! 前置：工作区根下并列存在 forge_runtime 与本仓 robots/piper
+#! test_action_source 驱动 task_robot + mujoco（Agilex Piper）
+#! 前置：工作区根下并列存在 forge_runtime 与本仓 robots/agilex_piper
 #! 运行: dora build dataflow.test_action_source.yaml --uv && dora run dataflow.test_action_source.yaml --uv
 
 nodes:

@@ -1,7 +1,7 @@
 [project]
 name = "agilex-piper"
 version = "0.1.0"
-description = "AgileX Piper Robot configuration and teleop workflow"
+description = "Agilex Piper Robot configuration and teleop workflow"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -16,13 +16,13 @@ dependencies = [
 ]
 
 [project.scripts]
-robots-piper = "robots_piper.main:main"
-robots_piper = "robots_piper.main:main"
+robots-agilex-piper = "robots_agilex_piper.main:main"
+robots_agilex_piper = "robots_agilex_piper.main:main"
 
 [tool.uv.sources]
-forge-common = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "dev", subdirectory = "packages/common" }
-forge-msgs = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "dev", subdirectory = "packages/msgs" }
-forge-robot = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "dev", subdirectory = "packages/robot" }
+forge-common = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "v2.0.0", subdirectory = "packages/common" }
+forge-msgs = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "v2.0.0", subdirectory = "packages/msgs" }
+forge-robot = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "v2.0.0", subdirectory = "packages/robot" }
 
 [project.optional-dependencies]
 pyinstaller = ["pyinstaller>=6.0"]
@@ -32,4 +32,4 @@ requires = ["uv_build>=0.8.17,<0.9.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "robots_piper"
+module-name = "robots_agilex_piper"

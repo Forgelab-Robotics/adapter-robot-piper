@@ -1,6 +1,6 @@
-# Piper 仿真交付记录
+# Agilex Piper 仿真交付记录
 
-本文件记录 Piper 仿真资产、MuJoCo 配置与 Dora workflow 的交付状态。当前交付已建立可复现的仿真配置，并完成 `mujoco_piper/dataflow.test_action_source.yaml` 自动 sweep smoke test 与原生 MuJoCo GUI 手动检查。
+本文件记录 Agilex Piper 仿真资产、MuJoCo 配置与 Dora workflow 的交付状态。当前交付已建立可复现的仿真配置，并完成 `mujoco_piper/dataflow.test_action_source.yaml` 自动 sweep smoke test 与原生 MuJoCo GUI 手动检查。
 
 ---
 
@@ -23,14 +23,14 @@
 复现检查命令：
 
 ```bash
-cd /path/to/robots/piper
+cd /path/to/robots/agilex_piper
 python scripts/verify_mjcf.py --xml assets/mjcf/piper_mujoco/scene.xml
 ```
 
 - **前缀**：`scene.xml` 使用 `attach` 前缀 `item_1/`，故模型内关节全名形如 `item_1/joint1`。Forge 配置里写无前缀的逻辑名 + `robots[].prefix: item_1/`。
 - **执行器**：`PIPER.xml` 中 `<actuator>` 共 **7** 个（6 个 arm position actuator、1 个 gripper actuator），与 `simulator.yaml` / `task_robot.yaml` 的 `actuator_order` 一致。
 - **夹爪**：`gripper` 为逻辑量，映射到 `gripper` actuator；状态由 `joint7` 与 `joint8` 的开口差派生为毫米量。
-- **相机**：`item_1/wrist_cam` 转发为 `image/hand`，场景级 `top`、`angle`、`left_pillar` 分别转发到同名 topic，以兼容既有 Forge Piper 示例。
+- **相机**：`item_1/wrist_cam` 转发为 `image/hand`，场景级 `top`、`angle`、`left_pillar` 分别转发到同名 topic，以兼容既有 Forge Agilex Piper 示例。
 
 ---
 
@@ -66,6 +66,6 @@ python scripts/verify_mjcf.py --xml assets/mjcf/piper_mujoco/scene.xml
 
 ## 交付复现命令
 
-1. 在 `robots/piper` 根目录运行：`python scripts/verify_mjcf.py --xml assets/mjcf/piper_mujoco/scene.xml`。
+1. 在 `robots/agilex_piper` 根目录运行：`python scripts/verify_mjcf.py --xml assets/mjcf/piper_mujoco/scene.xml`。
 2. 进入 **`examples/03_workflows/simulation/mujoco_piper/`**，按该目录 **`README.md`** 执行 `dora build` / `dora run`。
 3. 复核 **`mujoco_piper/simulator.yaml`** 与 **`mujoco_piper/task_robot.yaml`** 的 `actuator_order` 与相机 topic。

@@ -1,7 +1,7 @@
 # 片段示例：在 forge_runtime 的 MuJoCo 节点配置中，将 model_path 指向本仓已同步的 MJCF。
 # 复制到实际使用的 simulator.yaml 中合并，或改为相对 forge_runtime 示例目录的路径。
 
-# model_path: /absolute/path/to/robots/piper/assets/mjcf/piper_mujoco/scene.xml
+# model_path: /absolute/path/to/robots/agilex_piper/assets/mjcf/piper_mujoco/scene.xml
 
 # 若仍使用 forge_runtime 内置副本（与 monorepo 中已存在示例一致）：
 # model_path: ../../../../assets/mjcf/piper_mujoco/scene.xml

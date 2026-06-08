@@ -1,6 +1,6 @@
 # 仿真关节 / 自由度检查记录
 
-本文件记录 Piper MuJoCo 模型的仿真检查：`test_action_source --mode sweep` 自动动作驱动下的人工观察，以及原生 MuJoCo GUI 中手动调整控制量的检查。它不是逐关节 min / max / 回零验收表；真机方向、零位、限位仍归入后续实机复核。
+本文件记录 Agilex Piper MuJoCo 模型的仿真检查：`test_action_source --mode sweep` 自动动作驱动下的人工观察，以及原生 MuJoCo GUI 中手动调整控制量的检查。它不是逐关节 min / max / 回零验收表；真机方向、零位、限位仍归入后续实机复核。
 
 ## 检查前提
 
