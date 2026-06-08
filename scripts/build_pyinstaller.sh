@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# 打包 Piper 节点为单文件可执行程序。
+# 打包 Agilex Piper 节点为单文件可执行程序。
 # 产物在本包 dist/robots_agilex_piper，中间文件在本包 build/pyinstaller/。
 # 需先安装打包依赖，例如：
 #   uv sync --extra pyinstaller
@@ -17,14 +17,14 @@ cd "${PACKAGE_DIR}"
 mkdir -p "${DIST_DIR}" "${WORK_DIR}"
 rm -f "${DIST_DIR}/robots_agilex_piper" "${DIST_DIR}/robots_agilex_piper.exe"
 
-echo "==> Building robots_agilex_piper with PyInstaller (using ${PACKAGE_DIR}/robots_piper.spec)"
+echo "==> Building robots_agilex_piper with PyInstaller (using ${SCRIPT_DIR}/robots_agilex_piper.spec)"
 
 uv run --extra pyinstaller pyinstaller \
   --noconfirm \
   --clean \
   --distpath "${DIST_DIR}" \
   --workpath "${WORK_DIR}" \
-  "${PACKAGE_DIR}/robots_piper.spec"
+  "${SCRIPT_DIR}/robots_agilex_piper.spec"
 
 EXE_NAME="robots_agilex_piper"
 if [[ -f "${DIST_DIR}/${EXE_NAME}" ]]; then

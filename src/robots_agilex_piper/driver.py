@@ -1,4 +1,4 @@
-"""Piper 机械臂硬件驱动，实现 forge_robot.BaseRobotDriver 协议。"""
+"""Agilex Piper 机械臂硬件驱动，实现 forge_robot.BaseRobotDriver 协议。"""
 
 from __future__ import annotations
 
@@ -10,17 +10,17 @@ from forge_msgs import JointCommand, JointState
 from piper_sdk import C_PiperInterface_V2
 from forge_robot import BaseRobotDriver, clip_and_validate_position_command, specs_by_name
 
-from robots_piper.config import PIPER_ACTUATOR_ORDER, PIPER_ACTUATOR_SPECS
+from robots_agilex_piper.config import AGILEX_PIPER_ACTUATOR_ORDER, AGILEX_PIPER_ACTUATOR_SPECS
 from forge_common import get_logger
 
 logger = get_logger(__name__)
 
-_ACTUATOR_SPECS_DICT = specs_by_name(PIPER_ACTUATOR_SPECS)
+_ACTUATOR_SPECS_DICT = specs_by_name(AGILEX_PIPER_ACTUATOR_SPECS)
 
 
-class PiperDriver(BaseRobotDriver):
+class AgilexPiperDriver(BaseRobotDriver):
     """
-    Piper 机械臂硬件驱动。
+    Agilex Piper 机械臂硬件驱动。
 
     通过 CAN 与 piper-sdk 通信。主从：role="slave"（从站）连接后使能；
     role="master"（主站）仅连接不使能。单位：关节弧度、夹爪毫米。
@@ -28,7 +28,7 @@ class PiperDriver(BaseRobotDriver):
 
     @property
     def joint_order(self) -> list[str]:
-        return list(PIPER_ACTUATOR_ORDER)
+        return list(AGILEX_PIPER_ACTUATOR_ORDER)
 
     ANGLE_SCALE = 1000.0
     GRIPPER_SCALE = 1000.0
@@ -66,7 +66,7 @@ class PiperDriver(BaseRobotDriver):
             return
 
         self.bus = C_PiperInterface_V2(self.port)
-        logger.info("Connecting to Piper robot at port %s...", self.port)
+        logger.info("Connecting to Agilex Piper robot at port %s...", self.port)
         self.bus.ConnectPort()
 
         linkage = self._LINKAGE_SLAVE if self.is_follower else self._LINKAGE_MASTER
@@ -80,14 +80,14 @@ class PiperDriver(BaseRobotDriver):
             logger.info("Successfully connected (master, not enabled).")
 
     # EnablePiper 等待超时时间（秒），超时后尝试 ResetPiper 再重试一次
-    _ENABLE_PIPER_TIMEOUT_SEC = 2.0
+    _ENABLE_AGILEX_PIPER_TIMEOUT_SEC = 2.0
 
     def _connect_follower_mode(self) -> None:
         logger.info("Enabling the robot in follower mode...")
 
         def wait_enable() -> bool:
             """等待 EnablePiper 成功，超时返回 False。"""
-            deadline = time.monotonic() + self._ENABLE_PIPER_TIMEOUT_SEC
+            deadline = time.monotonic() + self._ENABLE_AGILEX_PIPER_TIMEOUT_SEC
             while not self.bus.EnablePiper():
                 if time.monotonic() >= deadline:
                     return False
@@ -98,7 +98,7 @@ class PiperDriver(BaseRobotDriver):
         if not wait_enable():
             logger.warning(
                 "EnablePiper timed out after %.1fs, calling ResetPiper and retrying once...",
-                self._ENABLE_PIPER_TIMEOUT_SEC,
+                self._ENABLE_AGILEX_PIPER_TIMEOUT_SEC,
             )
             self.bus.ResetPiper()
             time.sleep(0.5)

@@ -1,4 +1,4 @@
-# MuJoCo 节点：Piper（scene.xml + attach prefix=item_1/）
+# MuJoCo 节点：Agilex Piper（scene.xml + attach prefix=item_1/）
 model_path: ../../../../assets/mjcf/piper_mujoco/scene.xml
 control_hz: 50
 image_format: raw

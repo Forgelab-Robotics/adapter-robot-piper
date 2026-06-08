@@ -1,0 +1,6 @@
+# Agilex Piper follower 模式配置示例
+# 用于接收 action / master_state 并驱动从臂，典型来源：forge_runtime/examples/real_record/agilex_piper_slave.yaml
+
+port: can0
+is_follower: true
+# debug: true

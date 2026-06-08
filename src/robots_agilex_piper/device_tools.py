@@ -1,4 +1,4 @@
-"""Piper CAN 设备 CLI（list / activate / test），JSON 格式遵循 forge_robot.device_tools。"""
+"""Agilex Piper CAN 设备 CLI（list / activate / test），JSON 格式遵循 forge_robot.device_tools。"""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ echo "All CAN interfaces processed."
 
 _LINKAGE_MASTER = 0xFA
 _LINKAGE_SLAVE = 0xFC
-_ENABLE_PIPER_TIMEOUT_SEC = 2.0
+_ENABLE_AGILEX_PIPER_TIMEOUT_SEC = 2.0
 
 
 def _query_can_devices() -> list[dict]:
@@ -148,19 +148,19 @@ def cmd_activate_devices(*, use_json: bool = True) -> int:
     return exit_code
 
 
-def _verify_piper_online(port: str, wait_s: float = 0.08) -> bool:
+def _verify_agilex_piper_online(port: str, wait_s: float = 0.08) -> bool:
     """用 piper_sdk 校验设备是否真正在线。"""
     try:
         from piper_sdk import C_PiperInterface_V2
 
-        piper = C_PiperInterface_V2(port)
-        piper.ConnectPort()
+        agilex_piper = C_PiperInterface_V2(port)
+        agilex_piper.ConnectPort()
         time.sleep(wait_s)
         try:
-            maxspd = piper.GetAllMotorAngleLimitMaxSpd()
+            maxspd = agilex_piper.GetAllMotorAngleLimitMaxSpd()
             return maxspd.time_stamp != 0
         finally:
-            piper.DisconnectPort()
+            agilex_piper.DisconnectPort()
     except Exception:
         return False
 
@@ -209,7 +209,7 @@ def cmd_check_role(
         except Exception:
             role = "Offline"
 
-        if role in ("Slave", "Master") and not _verify_piper_online(can_interface):
+        if role in ("Slave", "Master") and not _verify_agilex_piper_online(can_interface):
             role = "Offline"
 
         devices.append(
@@ -248,11 +248,11 @@ def cmd_set_role(
 
     linkage = _LINKAGE_MASTER if role == "master" else _LINKAGE_SLAVE
     try:
-        piper = C_PiperInterface_V2(port)
-        piper.ConnectPort()
+        agilex_piper = C_PiperInterface_V2(port)
+        agilex_piper.ConnectPort()
         time.sleep(0.2)
         piper.MasterSlaveConfig(linkage, 0, 0, 0)
-        piper.DisconnectPort()
+        agilex_piper.DisconnectPort()
         result = ok_result(
             message=f"端口 {port} 已设置为 {role} 臂",
             devices=[address_info(name=port, role=role)],
@@ -282,8 +282,8 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
     """
     from piper_sdk import C_PiperInterface_V2
 
-    piper = C_PiperInterface_V2(port)
-    piper.ConnectPort()
+    agilex_piper = C_PiperInterface_V2(port)
+    agilex_piper.ConnectPort()
     piper.MasterSlaveConfig(_LINKAGE_SLAVE, 0, 0, 0)
 
     time.sleep(0.5)
@@ -291,7 +291,7 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
     time.sleep(0.5)
 
     def wait_enable() -> bool:
-        deadline = time.monotonic() + _ENABLE_PIPER_TIMEOUT_SEC
+        deadline = time.monotonic() + _ENABLE_AGILEX_PIPER_TIMEOUT_SEC
         while not piper.EnablePiper():
             if time.monotonic() >= deadline:
                 return False
@@ -300,7 +300,7 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
 
     if not wait_enable():
         print(
-            f"EnablePiper 在 {_ENABLE_PIPER_TIMEOUT_SEC:.1f}s 内超时，正在 ResetPiper 并重试一次...",
+            f"EnablePiper 在 {_ENABLE_AGILEX_PIPER_TIMEOUT_SEC:.1f}s 内超时，正在 ResetPiper 并重试一次...",
             file=sys.stderr,
         )
         piper.ResetPiper()
@@ -309,7 +309,7 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
                 "ResetPiper 后 EnablePiper 仍失败，请检查机械臂状态与连接。",
                 file=sys.stderr,
             )
-            piper.DisconnectPort()
+            agilex_piper.DisconnectPort()
             return 1
     piper.EnableArm(7)
 
@@ -339,5 +339,5 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
     finally:
         piper.GripperCtrl(0, 1000, 0x01, 0)
         time.sleep(0.2)
-        piper.DisconnectPort()
+        agilex_piper.DisconnectPort()
     return 0

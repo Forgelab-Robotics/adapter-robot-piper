@@ -12,4 +12,4 @@
 | 脚本 | 作用 |
 |------|------|
 | `sync_mjcf_from_robot_mj_model.sh` | 从 `robot-mj-model/models/PIPER` 导入到 `assets/mjcf/piper_mujoco/`（排除 `*.glb`） |
-| `sync_glb_from_upstream.sh` | 从外部 Piper 资产源拷贝所有 `*.glb` 到 `assets/glb/piper_upstream/` |
+| `sync_glb_from_upstream.sh` | 从外部 Agilex Piper 资产源拷贝所有 `*.glb` 到 `assets/glb/piper_upstream/` |

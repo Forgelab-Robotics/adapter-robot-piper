@@ -1,25 +1,26 @@
 # -*- mode: python ; coding: utf-8 -*-
 # ruff: noqa: F821
 # pyright: reportUndefinedVariable=false, reportMissingModuleSource=false
-# 在本目录执行：uv run --extra pyinstaller pyinstaller --noconfirm --clean robots_piper.spec
-# 或：./scripts/build_pyinstaller.sh
+# 在本包根目录执行：./scripts/build_pyinstaller.sh
+# 或：uv run --extra pyinstaller pyinstaller --noconfirm --clean scripts/robots_agilex_piper.spec
 
 from __future__ import annotations
 
 import os
 
 _spec_dir = os.path.dirname(os.path.abspath(SPEC))
-_src_dir = os.path.join(_spec_dir, "src")
+_package_dir = os.path.dirname(_spec_dir)
+_src_dir = os.path.join(_package_dir, "src")
 
 a = Analysis(
-    [os.path.join(_src_dir, "robots_piper", "main.py")],
-    pathex=[_src_dir, _spec_dir],
+    [os.path.join(_src_dir, "robots_agilex_piper", "main.py")],
+    pathex=[_src_dir, _package_dir],
     binaries=[],
     hiddenimports=[
-        "robots_piper",
-        "robots_piper.config",
-        "robots_piper.driver",
-        "robots_piper.device_tools",
+        "robots_agilex_piper",
+        "robots_agilex_piper.config",
+        "robots_agilex_piper.driver",
+        "robots_agilex_piper.device_tools",
         "can",
         "can.interface",
         "can.interfaces.socketcan",

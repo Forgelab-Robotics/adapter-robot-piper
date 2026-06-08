@@ -1,4 +1,4 @@
-"""Piper 节点配置加载与校验。"""
+"""Agilex Piper 节点配置加载与校验。"""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import yaml
 
 from forge_robot import ActuatorSpec
 
-PIPER_ACTUATOR_SPECS = (
+AGILEX_PIPER_ACTUATOR_SPECS = (
     ActuatorSpec(
         name="joint1",
         kind="revolute",
@@ -58,12 +58,12 @@ PIPER_ACTUATOR_SPECS = (
 )
 
 # 与 driver 中关节/夹爪顺序一致，固定不可配置
-PIPER_ACTUATOR_ORDER = [spec.name for spec in PIPER_ACTUATOR_SPECS]
+AGILEX_PIPER_ACTUATOR_ORDER = [spec.name for spec in AGILEX_PIPER_ACTUATOR_SPECS]
 
 
 @dataclass
-class PiperNodeConfig:
-    """Piper 节点配置。"""
+class AgilexPiperNodeConfig:
+    """Agilex Piper 节点配置。"""
 
     """与 task_robot 中 robots[].id 对应，用于 dataflow 中 input/output 的语义一致。"""
     port: str
@@ -71,7 +71,7 @@ class PiperNodeConfig:
     debug: bool = False
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "PiperNodeConfig":
+    def from_dict(cls, data: dict[str, Any]) -> "AgilexPiperNodeConfig":
         """从字典解析配置。"""
         port = data.get("port", "can0")
         is_follower = data.get("is_follower", True)
@@ -83,7 +83,7 @@ class PiperNodeConfig:
         )
 
     @classmethod
-    def from_yaml_path(cls, path: str | Path) -> "PiperNodeConfig":
+    def from_yaml_path(cls, path: str | Path) -> "AgilexPiperNodeConfig":
         """从 YAML 文件加载配置。"""
         p = Path(path)
         if not p.exists():
@@ -98,19 +98,19 @@ class PiperNodeConfig:
 def load_config(
     config_path: str | Path | None = None,
     dataflow_config: dict[str, Any] | None = None,
-) -> PiperNodeConfig:
+) -> AgilexPiperNodeConfig:
     """
     加载配置，支持多种来源（优先级从高到低）：
     1. dataflow_config 中的 config_path 或内联 config
     2. config_path 参数
-    3. 环境变量 PIPER_NODE_CONFIG
+    3. 环境变量 AGILEX_PIPER_NODE_CONFIG
 
     Args:
         config_path: 可选，YAML 配置文件路径
         dataflow_config: 可选，dora 节点 config 字段
 
     Returns:
-        PiperNodeConfig
+        AgilexPiperNodeConfig
     """
     data: dict[str, Any] | None = None
 
@@ -118,19 +118,19 @@ def load_config(
         if "config" in dataflow_config:
             data = dataflow_config["config"]
         elif "config_path" in dataflow_config:
-            return PiperNodeConfig.from_yaml_path(dataflow_config["config_path"])
+            return AgilexPiperNodeConfig.from_yaml_path(dataflow_config["config_path"])
 
     path = config_path
     if path is None and data is None:
-        path = os.environ.get("PIPER_NODE_CONFIG")
+        path = os.environ.get("AGILEX_PIPER_NODE_CONFIG")
 
     if path:
-        return PiperNodeConfig.from_yaml_path(path)
+        return AgilexPiperNodeConfig.from_yaml_path(path)
 
     if data:
-        return PiperNodeConfig.from_dict(data)
+        return AgilexPiperNodeConfig.from_dict(data)
 
     raise ValueError(
-        "未找到配置。请设置 PIPER_NODE_CONFIG 环境变量、"
+        "未找到配置。请设置 AGILEX_PIPER_NODE_CONFIG 环境变量、"
         "或通过 --config 指定配置文件、或使用 dataflow config。"
     )
