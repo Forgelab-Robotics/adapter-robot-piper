@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+import json
+import math
+import select
 import subprocess
 import sys
+import termios
 import time
+import tty
+from contextlib import contextmanager
+from pathlib import Path
+from collections.abc import Iterator
 from typing import Literal
 
 from forge_robot.device_tools import (
@@ -52,6 +60,10 @@ echo "All CAN interfaces processed."
 _LINKAGE_MASTER = 0xFA
 _LINKAGE_SLAVE = 0xFC
 _ENABLE_AGILEX_PIPER_TIMEOUT_SEC = 2.0
+_ANGLE_SCALE = 1000.0
+_POSITION_SCALE = 1000.0
+_JOINT_NAMES = ("joint1", "joint2", "joint3", "joint4", "joint5", "joint6")
+_DEFAULT_WATCH_STATE_SAVE_PATH = "agilex_piper_watch_state.jsonl"
 
 
 def _query_can_devices() -> list[dict]:
@@ -146,6 +158,200 @@ def cmd_activate_devices(*, use_json: bool = True) -> int:
         else:
             print(result["message"], file=sys.stderr)
     return exit_code
+
+
+def _scaled_radians(raw_value: float | int) -> float:
+    return math.radians(float(raw_value) / _ANGLE_SCALE)
+
+
+def _scaled_mm(raw_value: float | int) -> float:
+    return float(raw_value) / _POSITION_SCALE
+
+
+def _read_joint_and_gripper(
+    agilex_piper: object,
+) -> tuple[dict[str, float], float]:
+    joint_msg = agilex_piper.GetArmJointMsgs()
+    gripper_msg = agilex_piper.GetArmGripperMsgs()
+    joints = joint_msg.joint_state
+    gripper = gripper_msg.gripper_state
+
+    joint_values = {
+        "joint1": _scaled_radians(joints.joint_1),
+        "joint2": _scaled_radians(joints.joint_2),
+        "joint3": _scaled_radians(joints.joint_3),
+        "joint4": _scaled_radians(joints.joint_4),
+        "joint5": _scaled_radians(joints.joint_5),
+        "joint6": _scaled_radians(joints.joint_6),
+    }
+    return joint_values, _scaled_mm(gripper.grippers_angle)
+
+
+def _read_ee_pose(agilex_piper: object) -> dict[str, float]:
+    end_pose_msg = agilex_piper.GetArmEndPoseMsgs()
+    end_pose = end_pose_msg.end_pose
+    return {
+        "x": _scaled_mm(end_pose.X_axis),
+        "y": _scaled_mm(end_pose.Y_axis),
+        "z": _scaled_mm(end_pose.Z_axis),
+        "rx": _scaled_radians(end_pose.RX_axis),
+        "ry": _scaled_radians(end_pose.RY_axis),
+        "rz": _scaled_radians(end_pose.RZ_axis),
+    }
+
+
+def _read_watch_state(
+    agilex_piper: object,
+    *,
+    port: str,
+) -> dict:
+    joints, gripper = _read_joint_and_gripper(agilex_piper)
+    ee = _read_ee_pose(agilex_piper)
+    return {
+        "port": port,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "joints": joints,
+        "gripper": gripper,
+        "ee": ee,
+    }
+
+
+def _append_watch_state_jsonl(frame: dict, save_path: str | Path) -> Path:
+    path = Path(save_path)
+    with path.open("a", encoding="utf-8") as f:
+        json.dump(frame, f, ensure_ascii=False, separators=(",", ":"))
+        f.write("\n")
+    return path
+
+
+@contextmanager
+def _watch_state_keypress_mode(enabled: bool) -> Iterator[bool]:
+    if not enabled or not sys.stdin.isatty():
+        yield False
+        return
+
+    fd = sys.stdin.fileno()
+    old_attrs = termios.tcgetattr(fd)
+    try:
+        tty.setcbreak(fd)
+        yield True
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_attrs)
+
+
+def _read_pressed_keys(enabled: bool) -> list[str]:
+    if not enabled:
+        return []
+
+    keys: list[str] = []
+    while True:
+        readable, _, _ = select.select([sys.stdin], [], [], 0)
+        if not readable:
+            return keys
+        key = sys.stdin.read(1)
+        if not key:
+            return keys
+        keys.append(key)
+
+
+def _format_watch_state(
+    frame: dict,
+    *,
+    save_path: str | Path,
+    save_count: int,
+    save_message: str | None,
+    keypress_enabled: bool,
+) -> str:
+    lines = [
+        "Agilex Piper state monitor",
+        f"port={frame['port']} time={frame['timestamp']}",
+        f"press s to save current frame -> {save_path}",
+        "",
+        "joints (radians)",
+    ]
+    joints = frame["joints"]
+    for name in _JOINT_NAMES:
+        lines.append(f"  {name:<7} {joints[name]:> .6f}")
+    lines.extend(
+        [
+            "",
+            f"gripper (mm) {frame['gripper']:> .3f}",
+            "",
+            "ee position (mm)",
+            f"  x  {frame['ee']['x']:> .3f}",
+            f"  y  {frame['ee']['y']:> .3f}",
+            f"  z  {frame['ee']['z']:> .3f}",
+            "",
+            "ee orientation (radians)",
+            f"  rx {frame['ee']['rx']:> .6f}",
+            f"  ry {frame['ee']['ry']:> .6f}",
+            f"  rz {frame['ee']['rz']:> .6f}",
+        ]
+    )
+    if save_message is not None:
+        lines.extend(["", save_message])
+    elif save_count > 0:
+        lines.extend(["", f"saved frames: {save_count}"])
+    if not keypress_enabled:
+        lines.extend(["", "keypress disabled because stdin is not a TTY"])
+    return "\n".join(lines)
+
+
+def cmd_watch_state(
+    port: str = "can0",
+    *,
+    hz: float = 10.0,
+    save_path: str | Path = _DEFAULT_WATCH_STATE_SAVE_PATH,
+) -> int:
+    """只读持续显示指定 CAN 端口的关节、夹爪和末端位姿状态。"""
+    if hz <= 0:
+        print("--hz 必须大于 0", file=sys.stderr)
+        return 2
+
+    from piper_sdk import C_PiperInterface_V2
+
+    agilex_piper = C_PiperInterface_V2(port)
+    period = 1.0 / hz
+    save_count = 0
+    save_message: str | None = None
+    save_message_deadline = 0.0
+
+    try:
+        agilex_piper.ConnectPort()
+        with _watch_state_keypress_mode(True) as keypress_enabled:
+            while True:
+                frame = _read_watch_state(
+                    agilex_piper,
+                    port=port,
+                )
+                for key in _read_pressed_keys(keypress_enabled):
+                    if key.lower() == "s":
+                        try:
+                            saved_path = _append_watch_state_jsonl(frame, save_path)
+                        except OSError as e:
+                            save_message = f"save failed: {e}"
+                        else:
+                            save_count += 1
+                            save_message = f"saved #{save_count} to {saved_path}"
+                        save_message_deadline = time.monotonic() + 3.0
+
+                current_save_message = (
+                    save_message if time.monotonic() < save_message_deadline else None
+                )
+                output = _format_watch_state(
+                    frame,
+                    save_path=save_path,
+                    save_count=save_count,
+                    save_message=current_save_message,
+                    keypress_enabled=keypress_enabled,
+                )
+                print("\033[2J\033[H" + output, end="", flush=True)
+                time.sleep(period)
+    except KeyboardInterrupt:
+        print()
+        return 0
+    finally:
+        agilex_piper.DisconnectPort()
 
 
 def _verify_agilex_piper_online(port: str, wait_s: float = 0.08) -> bool:
@@ -251,7 +457,7 @@ def cmd_set_role(
         agilex_piper = C_PiperInterface_V2(port)
         agilex_piper.ConnectPort()
         time.sleep(0.2)
-        piper.MasterSlaveConfig(linkage, 0, 0, 0)
+        agilex_piper.MasterSlaveConfig(linkage, 0, 0, 0)
         agilex_piper.DisconnectPort()
         result = ok_result(
             message=f"端口 {port} 已设置为 {role} 臂",
@@ -284,15 +490,15 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
 
     agilex_piper = C_PiperInterface_V2(port)
     agilex_piper.ConnectPort()
-    piper.MasterSlaveConfig(_LINKAGE_SLAVE, 0, 0, 0)
+    agilex_piper.MasterSlaveConfig(_LINKAGE_SLAVE, 0, 0, 0)
 
     time.sleep(0.5)
-    piper.ModeCtrl(0x01, 0x01, 30, 0x00)
+    agilex_piper.ModeCtrl(0x01, 0x01, 30, 0x00)
     time.sleep(0.5)
 
     def wait_enable() -> bool:
         deadline = time.monotonic() + _ENABLE_AGILEX_PIPER_TIMEOUT_SEC
-        while not piper.EnablePiper():
+        while not agilex_piper.EnablePiper():
             if time.monotonic() >= deadline:
                 return False
             time.sleep(0.01)
@@ -303,7 +509,7 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
             f"EnablePiper 在 {_ENABLE_AGILEX_PIPER_TIMEOUT_SEC:.1f}s 内超时，正在 ResetPiper 并重试一次...",
             file=sys.stderr,
         )
-        piper.ResetPiper()
+        agilex_piper.ResetPiper()
         if not wait_enable():
             print(
                 "ResetPiper 后 EnablePiper 仍失败，请检查机械臂状态与连接。",
@@ -311,10 +517,10 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
             )
             agilex_piper.DisconnectPort()
             return 1
-    piper.EnableArm(7)
+    agilex_piper.EnableArm(7)
 
-    piper.JointCtrl(0, 0, 0, 0, 0, 0)
-    piper.GripperCtrl(0, 1000, 0x01, 0)
+    agilex_piper.JointCtrl(0, 0, 0, 0, 0, 0)
+    agilex_piper.GripperCtrl(0, 1000, 0x01, 0)
     time.sleep(0.5)
 
     range_hw = int(0.05 * 1000 * 1000)
@@ -334,10 +540,10 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
                 count = -1
             count += 1
             range_val = 0 if (phase == 0 or phase == 2) else range_hw
-            piper.GripperCtrl(abs(range_val), 1000, 0x01, 0)
+            agilex_piper.GripperCtrl(abs(range_val), 1000, 0x01, 0)
             time.sleep(0.005)
     finally:
-        piper.GripperCtrl(0, 1000, 0x01, 0)
+        agilex_piper.GripperCtrl(0, 1000, 0x01, 0)
         time.sleep(0.2)
         agilex_piper.DisconnectPort()
     return 0

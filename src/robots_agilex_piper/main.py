@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 app = typer.Typer(
     name="robots_agilex_piper",
     help="Agilex Piper 机械臂 dora 节点与 CAN 设备工具。无子命令时默认运行节点；"
-    "可用 run / test / list-devices / activate-devices / check-role / set-role。",
+    "可用 run / test / list-devices / activate-devices / check-role / set-role / watch-state。",
     no_args_is_help=False,
 )
 
@@ -67,6 +67,28 @@ def test(
     from robots_agilex_piper.device_tools import cmd_test
 
     sys.exit(cmd_test(port=port, duration=duration))
+
+
+@app.command("watch-state")
+def watch_state(
+    port: str = typer.Argument("can0", help="CAN 设备名"),
+    hz: float = typer.Option(10.0, "--hz", help="刷新频率（Hz）"),
+    save_path: str = typer.Option(
+        "agilex_piper_watch_state.jsonl",
+        "--save-path",
+        help="按 s 保存当前帧的 JSONL 文件路径",
+    ),
+) -> None:
+    """持续显示指定 CAN 端口的 joint1-joint6、gripper 与 EE 状态。"""
+    from robots_agilex_piper.device_tools import cmd_watch_state
+
+    sys.exit(
+        cmd_watch_state(
+            port=port,
+            hz=hz,
+            save_path=save_path,
+        )
+    )
 
 
 @app.command("list-devices")
