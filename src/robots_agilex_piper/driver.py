@@ -10,7 +10,11 @@ from forge_msgs import JointCommand, JointState
 from piper_sdk import C_PiperInterface_V2
 from forge_robot import BaseRobotDriver, clip_and_validate_position_command, specs_by_name
 
-from robots_agilex_piper.config import AGILEX_PIPER_ACTUATOR_ORDER, AGILEX_PIPER_ACTUATOR_SPECS
+from robots_agilex_piper.config import (
+    AGILEX_PIPER_ACTUATOR_ORDER,
+    AGILEX_PIPER_ACTUATOR_SPECS,
+    AGILEX_PIPER_DEFAULT_POSITIONS,
+)
 from forge_common import get_logger
 
 logger = get_logger(__name__)
@@ -41,6 +45,7 @@ class AgilexPiperDriver(BaseRobotDriver):
         port: str = "can0",
         role: Literal["master", "slave"] = "slave",
         is_follower: bool | None = None,
+        positions: dict[str, dict[str, float]] | None = None,
         auto_connect: bool = True,
     ):
         if role == "master":
@@ -53,12 +58,27 @@ class AgilexPiperDriver(BaseRobotDriver):
             "slave" if self.is_follower else "master"
         )
         self.port = port
+        self._positions = self._resolve_positions(positions)
         self.bus: C_PiperInterface_V2 | None = None
         # Leader 模式下 get_state 不是总有数据，全 0 视为无效，用缓存
         self._state_cache: JointState | None = None
 
         if auto_connect:
             self.connect()
+
+    @staticmethod
+    def _resolve_positions(
+        positions: dict[str, dict[str, float]] | None,
+    ) -> dict[str, dict[str, float]]:
+        resolved = {
+            name: dict(position)
+            for name, position in AGILEX_PIPER_DEFAULT_POSITIONS.items()
+        }
+        if positions:
+            for name, position in positions.items():
+                if name in resolved:
+                    resolved[name].update(position)
+        return resolved
 
     def connect(self) -> None:
         if self.bus is not None:
@@ -112,20 +132,50 @@ class AgilexPiperDriver(BaseRobotDriver):
         self.move_to_home_position()
 
     def move_to_home_position(self) -> None:
-        """将关节与夹爪移动到 Home 位（全 0）。"""
-        if self.bus is None:
-            raise RuntimeError("Robot is not connected. Call connect() first.")
-        logger.info("Moving robot to home position (all 0)...")
-        self.bus.JointCtrl(0, 0, 0, 0, 0, 0)
-        self.bus.GripperCtrl(0, 1000, 0x01, 0)
+        """将关节与夹爪移动到配置的连接初始位。"""
+        self._move_to_position("initial", self._positions["initial"], speed=30)
 
     def move_to_rest_position(self) -> None:
-        """将关节与夹爪移动到休息位（防摔，j5=0.3 rad）。"""
+        """将关节与夹爪移动到配置的断开安全位。"""
+        self._move_to_position("rest", self._positions["rest"], speed=30)
+
+    def _move_to_position(
+        self,
+        name: str,
+        target: dict[str, float],
+        *,
+        speed: int,
+    ) -> None:
+        """下发生命周期位姿，单位为关节弧度、夹爪毫米。"""
         if self.bus is None:
             raise RuntimeError("Robot is not connected. Call connect() first.")
-        logger.info("Moving robot to rest position (j5=0.3 rad)...")
-        self.bus.JointCtrl(0, 0, 0, 0, int(math.degrees(0.3) * self.ANGLE_SCALE), 0)
-        self.bus.GripperCtrl(0, 1000, 0x01, 0)
+
+        command = JointCommand(
+            name=self.joint_order,
+            mode="position",
+            position=[target.get(actuator, 0.0) for actuator in self.joint_order],
+            velocity=[],
+            effort=[],
+            kp=[],
+            kd=[],
+        )
+        safe_command = clip_and_validate_position_command(command, _ACTUATOR_SPECS_DICT)
+        action_dict = dict(
+            zip(safe_command.name, safe_command.position, strict=False)
+        )
+
+        j1 = int(math.degrees(action_dict.get("joint1", 0.0)) * self.ANGLE_SCALE)
+        j2 = int(math.degrees(action_dict.get("joint2", 0.0)) * self.ANGLE_SCALE)
+        j3 = int(math.degrees(action_dict.get("joint3", 0.0)) * self.ANGLE_SCALE)
+        j4 = int(math.degrees(action_dict.get("joint4", 0.0)) * self.ANGLE_SCALE)
+        j5 = int(math.degrees(action_dict.get("joint5", 0.0)) * self.ANGLE_SCALE)
+        j6 = int(math.degrees(action_dict.get("joint6", 0.0)) * self.ANGLE_SCALE)
+        gripper = int(action_dict.get("gripper", 0.0) * self.GRIPPER_SCALE)
+
+        logger.info("Moving robot to %s position: %s", name, action_dict)
+        self.bus.MotionCtrl_2(0x01, 0x01, speed)
+        self.bus.JointCtrl(j1, j2, j3, j4, j5, j6)
+        self.bus.GripperCtrl(abs(gripper), 1000, 0x01, 0)
 
     def _connect_master_mode(self) -> None:
         logger.info("Robot configured in master mode.")

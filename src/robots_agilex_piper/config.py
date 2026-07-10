@@ -60,6 +60,51 @@ AGILEX_PIPER_ACTUATOR_SPECS = (
 # 与 driver 中关节/夹爪顺序一致，固定不可配置
 AGILEX_PIPER_ACTUATOR_ORDER = [spec.name for spec in AGILEX_PIPER_ACTUATOR_SPECS]
 
+AGILEX_PIPER_DEFAULT_POSITIONS: dict[str, dict[str, float]] = {
+    "initial": {name: 0.0 for name in AGILEX_PIPER_ACTUATOR_ORDER},
+    "rest": {
+        "joint1": 0.0,
+        "joint2": 0.0,
+        "joint3": 0.0,
+        "joint4": 0.0,
+        "joint5": 0.3,
+        "joint6": 0.0,
+        "gripper": 0.0,
+    },
+}
+
+
+def _parse_positions(data: Any) -> dict[str, dict[str, float]] | None:
+    if data is None:
+        return None
+    if not isinstance(data, dict):
+        raise ValueError("positions 必须是字典。")
+
+    allowed_position_names = set(AGILEX_PIPER_DEFAULT_POSITIONS)
+    allowed_actuator_names = set(AGILEX_PIPER_ACTUATOR_ORDER)
+    parsed: dict[str, dict[str, float]] = {}
+
+    for position_name, position in data.items():
+        name = str(position_name)
+        if name not in allowed_position_names:
+            raise ValueError(
+                f"未知 positions 名称: {name}，可用值: {sorted(allowed_position_names)}"
+            )
+        if not isinstance(position, dict):
+            raise ValueError(f"positions.{name} 必须是字典。")
+
+        parsed_position: dict[str, float] = {}
+        for actuator_name, value in position.items():
+            key = str(actuator_name)
+            if key not in allowed_actuator_names:
+                raise ValueError(
+                    f"未知 actuator 名称: {key}，可用值: {AGILEX_PIPER_ACTUATOR_ORDER}"
+                )
+            parsed_position[key] = float(value)
+        parsed[name] = parsed_position
+
+    return parsed
+
 
 @dataclass
 class AgilexPiperNodeConfig:
@@ -69,6 +114,7 @@ class AgilexPiperNodeConfig:
     port: str
     is_follower: bool
     debug: bool = False
+    positions: dict[str, dict[str, float]] | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "AgilexPiperNodeConfig":
@@ -76,11 +122,25 @@ class AgilexPiperNodeConfig:
         port = data.get("port", "can0")
         is_follower = data.get("is_follower", True)
         debug = data.get("debug", False)
+        positions = _parse_positions(data.get("positions"))
         return cls(
             port=port,
             is_follower=is_follower,
             debug=debug,
+            positions=positions,
         )
+
+    def resolved_position(self, name: str) -> dict[str, float]:
+        """返回完整生命周期位姿，未配置的关节使用默认值。"""
+        if name not in AGILEX_PIPER_DEFAULT_POSITIONS:
+            raise ValueError(
+                f"未知 positions 名称: {name}，"
+                f"可用值: {sorted(AGILEX_PIPER_DEFAULT_POSITIONS)}"
+            )
+        position = dict(AGILEX_PIPER_DEFAULT_POSITIONS[name])
+        if self.positions and name in self.positions:
+            position.update(self.positions[name])
+        return position
 
     @classmethod
     def from_yaml_path(cls, path: str | Path) -> "AgilexPiperNodeConfig":

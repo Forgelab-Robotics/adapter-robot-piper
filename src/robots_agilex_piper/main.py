@@ -29,6 +29,10 @@ def _run_node(config_path: str | None) -> int:
     driver = AgilexPiperDriver(
         port=config.port,
         is_follower=config.is_follower,
+        positions={
+            "initial": config.resolved_position("initial"),
+            "rest": config.resolved_position("rest"),
+        },
         auto_connect=True,
     )
     return run_dora_robot_node(
