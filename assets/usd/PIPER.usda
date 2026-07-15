@@ -1,0 +1,781 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (0.7169527123477385, 0.9091341954409123, 0.9354978962773591)
+                double3 target = (-0.13690889515148097, 0.05527258794169321, 0.08163630915830522)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        string creator = "MuJoCo USD Converter v0.2.0"
+        dictionary omni_layer = {
+            string authoring_layer = "./PIPER.usda"
+        }
+        dictionary renderSettings = {
+            double "rtx:directLighting:sampledLighting:maxRayUnexposedIntensity" = 6399.9990234375
+            double "rtx:indirectDiffuse:maxRayUnexposedIntensity" = 6399.9990234375
+            double "rtx:pathtracing:fireflyFilter:maxPerEmissiveUnexposedIntensity" = 3199.99951171875
+            double "rtx:pathtracing:fireflyFilter:maxUnexposedIntensityPerSample" = 3199.99951171875
+            double "rtx:pathtracing:fireflyFilter:maxUnexposedIntensityPerSampleDiffuse" = 3199.99951171875
+            double "rtx:raytracing:inscattering:maxRTSampleUnexposedIntensity" = 204799.96875
+            double "rtx:translucency:maxRayUnexposedIntensity" = 19199.998046875
+        }
+    }
+    defaultPrim = "PIPER"
+    doc = """Generated from Composed Stage of root layer /tmp/tmptc_8i7a8/PIPER.usdc
+
+
+Generated from Composed Stage of root layer /tmp/mjcf_import_PIPER_wi_miy4w/usdex_PIPER/PIPER.usdc
+
+
+Generated from Composed Stage of root layer /tmp/mjcf_import_PIPER_wi_miy4w/temp_PIPER/PIPER.usd
+
+
+Generated from Composed Stage of root layer /home/exai/robots_assets/Piper/PIPER/payloads/base.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "PIPER" (
+    prepend references = @./payloads/base.usda@
+    variants = {
+        string Physics = "physx"
+    }
+    append variantSets = "Physics"
+)
+{
+    def Xform "GroundPlane"
+    {
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Mesh "CollisionMesh"
+        {
+            uniform bool doubleSided = 0
+            int[] faceVertexCounts = [4]
+            int[] faceVertexIndices = [0, 1, 2, 3]
+            normal3f[] normals = [(0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1)]
+            point3f[] points = [(-25, -25, 0), (25, -25, 0), (25, 25, 0), (-25, 25, 0)]
+            color3f[] primvars:displayColor = [(0.5, 0.5, 0.5)]
+            texCoord2f[] primvars:st = [(0, 0), (1, 0), (1, 1), (0, 1)] (
+                interpolation = "varying"
+            )
+        }
+
+        def Plane "CollisionPlane" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token axis = "Z"
+            uniform token purpose = "guide"
+        }
+    }
+
+    over "Geometry"
+    {
+        over "base_link"
+        {
+            over "link1"
+            {
+                over "link2"
+                {
+                    over "link3"
+                    {
+                        over "link4"
+                        {
+                            over "link5"
+                            {
+                                over "link6"
+                                {
+                                    over "link7"
+                                    {
+                                        over "joint7"
+                                        {
+                                            float drive:linear:physics:targetPosition = -2.4
+                                            bool[] isaac:actuator (
+                                                displayName = "Actuator"
+                                            )
+                                            string isaac:NameOverride (
+                                                displayName = "Joint Name Override"
+                                            )
+                                            token[] isaac:physics:DofOffsetOpOrder (
+                                                displayName = "Dof Offset Op Order"
+                                            )
+                                            float state:linear:physics:position = 0
+                                            float state:linear:physics:velocity = 0
+                                        }
+                                    }
+
+                                    over "link8"
+                                    {
+                                        over "joint8"
+                                        {
+                                            float state:linear:physics:position = 0
+                                            float state:linear:physics:velocity = 0
+                                        }
+                                    }
+
+                                    over "joint6"
+                                    {
+                                        float state:angular:physics:position = 0
+                                        float state:angular:physics:velocity = 0
+                                    }
+                                }
+
+                                over "joint5"
+                                {
+                                    bool[] isaac:actuator (
+                                        displayName = "Actuator"
+                                    )
+                                    string isaac:NameOverride (
+                                        displayName = "Joint Name Override"
+                                    )
+                                    token[] isaac:physics:DofOffsetOpOrder (
+                                        displayName = "Dof Offset Op Order"
+                                    )
+                                    float state:angular:physics:position = 0
+                                    float state:angular:physics:velocity = 0
+                                }
+                            }
+
+                            over "joint4"
+                            {
+                                bool[] isaac:actuator (
+                                    displayName = "Actuator"
+                                )
+                                string isaac:NameOverride (
+                                    displayName = "Joint Name Override"
+                                )
+                                token[] isaac:physics:DofOffsetOpOrder (
+                                    displayName = "Dof Offset Op Order"
+                                )
+                                float state:angular:physics:position = 0
+                                float state:angular:physics:velocity = 0
+                            }
+                        }
+
+                        over "joint3"
+                        {
+                            float state:angular:physics:position = 0
+                            float state:angular:physics:velocity = 0
+                        }
+                    }
+
+                    over "joint2"
+                    {
+                        float state:angular:physics:position = 0
+                        float state:angular:physics:velocity = 0
+                    }
+                }
+
+                over "joint1"
+                {
+                    float drive:angular:physics:targetPosition = 0
+                    bool[] isaac:actuator (
+                        displayName = "Actuator"
+                    )
+                    string isaac:NameOverride (
+                        displayName = "Joint Name Override"
+                    )
+                    token[] isaac:physics:DofOffsetOpOrder (
+                        displayName = "Dof Offset Op Order"
+                    )
+                    float state:angular:physics:position = 0
+                    float state:angular:physics:velocity = 0
+                }
+            }
+        }
+    }
+
+    def Camera "Camera_Front" (
+        prepend apiSchemas = ["OmniRtxCameraAutoExposureAPI_1", "OmniRtxCameraExposureAPI_1"]
+        customData = {
+            dictionary omni = {
+                dictionary kit = {
+                    bool locked = 0
+                }
+            }
+        }
+        kind = ""
+    )
+    {
+        float4[] clippingPlanes (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float2 clippingRange = (0.01, 10000000) (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float exposure (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float exposure:fStop = 5 (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float exposure:iso (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float exposure:responsivity = 1.1026709 (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float exposure:time = 0.02 (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float focalLength = 18.147562 (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float focusDistance = 400 (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float fStop (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float horizontalAperture (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float horizontalApertureOffset (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -169.86739996531875) (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float omni:rtx:autoExposure:adaptationSpeed (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        bool omni:rtx:autoExposure:enabled (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        bool omni:rtx:autoExposure:histogramClamping:enabled (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float omni:rtx:autoExposure:histogramClamping:maxLuminance (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float omni:rtx:autoExposure:histogramClamping:minLuminance (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        token omni:rtx:autoExposure:histogramFilter (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float omni:rtx:autoExposure:whitePointScale (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        token projection (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        rel proxyPrim (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        uniform token purpose (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        double shutter:close (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        double shutter:open (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        uniform token stereoRole (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float verticalAperture (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        float verticalApertureOffset (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        token visibility (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        quatd xformOp:orient = (0.5000000000000001, 0.5, 0.49999999999999994, 0.5) (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        double3 xformOp:scale = (0.001, 0.0011200000000001844, 0.001) (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        double3 xformOp:translate = (0.800000011920929, 5.81330787972447e-14, 0.20000000298023224) (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"] (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 0
+                    }
+                }
+            }
+        )
+    }
+
+    def Camera "Camera_Top" (
+        prepend apiSchemas = ["OmniRtxCameraAutoExposureAPI_1", "OmniRtxCameraExposureAPI_1"]
+    )
+    {
+        float2 clippingRange = (0.01, 10000000)
+        float exposure:fStop = 5
+        float exposure:responsivity = 1.1026709
+        float exposure:time = 0.02
+        float focalLength = 18.147562
+        float focusDistance = 400
+        quatd xformOp:orient = (1, 0, 0, 0)
+        double3 xformOp:scale = (0.001, 0.001, 0.001)
+        double3 xformOp:translate = (0, 0, 1.5000000223517418)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+
+    def Camera "Camera_Corner" (
+        prepend apiSchemas = ["OmniRtxCameraAutoExposureAPI_1", "OmniRtxCameraExposureAPI_1"]
+    )
+    {
+        float2 clippingRange = (0.01, 10000000)
+        float exposure:fStop = 5
+        float exposure:responsivity = 1.1026709
+        float exposure:time = 0.02
+        float focalLength = 18.147562
+        float focusDistance = 400
+        custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -4.956231777812254e-8)
+        quatd xformOp:orient = (0.29743912740820355, 0.12139170341812443, 0.44887656209152804, 0.8338488183314667)
+        double3 xformOp:scale = (0.0010000000474974513, 0.0010000000474974513, 0.0010000000474974513)
+        double3 xformOp:translate = (1.0626769019985547, 1.5225158870853037, 1.4384428905351496)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+
+    def DomeLight "DomeLight" (
+        prepend apiSchemas = ["ShapingAPI"]
+    )
+    {
+        color3f inputs:color = (0.99999, 1, 0.9999912)
+        float inputs:intensity = 1500
+        float inputs:shaping:cone:angle = 180
+        float inputs:shaping:cone:softness
+        float inputs:shaping:focus
+        color3f inputs:shaping:focusTint
+        asset inputs:shaping:ies:file
+        token inputs:texture:format = "latlong"
+        custom int omni:rtx:usdluxVersion = 2505
+        quatd xformOp:orient = (0.4999999999999999, 0.5, -0.5000000000000001, -0.5)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+    variantSet "Physics" = {
+        "mujoco" (
+            prepend payload = @./payloads/Physics/mujoco.usda@
+        ) {
+
+        }
+        "none" {
+
+        }
+        "physics" (
+            prepend payload = @./payloads/Physics/physics.usda@
+        ) {
+
+        }
+        "physx" (
+            prepend payload = @./payloads/Physics/physx.usda@
+        ) {
+
+        }
+    }
+}
+
+def "Render" (
+    hide_in_stage_window = true
+    no_delete = true
+)
+{
+    def "OmniverseKit"
+    {
+        def "HydraTextures" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            def RenderProduct "omni_kit_widget_viewport_ViewportTexture_0" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </OmniverseKit_Persp>
+                token omni:rtx:ambientOcclusion:denoiserMode = "none"
+                token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
+                token omni:rtx:background:source:type = "domeLight"
+                bool omni:rtx:debug:view:pixelDebug:enableFixedTextPos = 1
+                token omni:rtx:directLighting:sampledLighting:denoisingTechnique = "None"
+                bool omni:rtx:dlss:frameGeneration = 0
+                float3 omni:rtx:domeLight:rotationAxis = (0, 0, 1)
+                bool omni:rtx:indirectDiffuse:denoiser:enabled = 0
+                bool omni:rtx:material:db:syncLoads = 1
+                token omni:rtx:post:dlss:execMode = "performance"
+                bool omni:rtx:post:registeredCompositing:invertColorCorrection = 1
+                bool omni:rtx:post:registeredCompositing:invertToneMap = 1
+                bool omni:rtx:pt:adaptiveSampling:filterError = 0
+                uint omni:rtx:pt:adaptiveSampling:fixedSppIterations = 2
+                float omni:rtx:pt:fireflyFilter:maxPerEmissiveUnexposedIntensity = 3199.9995
+                float omni:rtx:pt:fireflyFilter:maxUnexposedIntensityPerSample = 3199.9995
+                float omni:rtx:pt:fireflyFilter:maxUnexposedIntensityPerSampleDiffuse = 3199.9995
+                uint omni:rtx:pt:maxSamplesPerLaunch = 2073600
+                uint omni:rtx:pt:mgpu:maxPixelsPerRegionExponent = 12
+                bool omni:rtx:reflections:denoiser:enabled = 0
+                token omni:rtx:rendermode = "RealTimePathTracing"
+                color3f omni:rtx:rt:ambientLight:color = (0.1, 0.1, 0.1)
+                bool omni:rtx:rt:demoire = 0
+                float omni:rtx:rt:directLighting:maxRayUnexposedIntensity = 6399.999
+                bool omni:rtx:rt:ecoMode:enabled
+                float omni:rtx:rt:indirectdiffuse:maxRayUnexposedIntensity = 6399.999
+                float omni:rtx:rt:inscattering:maxRTSampleUnexposedIntensity = 204799.97
+                bool omni:rtx:rt:lightcache:spatialCache:dontResolveConflicts = 1
+                float omni:rtx:rt:refractions:maxRayUnexposedIntensity = 19199.998
+                int omni:rtx:rt:sss:samples = 1
+                uint omni:rtx:rtpt:maxVolumeBounces = 15
+                float omni:rtx:rtpt:modulatingRoughnessThreshold = 0.08
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                bool omni:rtx:scene:hydra:mdlMaterialWarmup = 1
+                bool omni:rtx:scene:useViewLightingMode = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+        }
+    }
+
+    def RenderSettings "OmniverseGlobalRenderSettings" (
+        prepend apiSchemas = ["OmniRtxSettingsGlobalRtAdvancedAPI_1", "OmniRtxSettingsGlobalPtAdvancedAPI_1"]
+        no_delete = true
+    )
+    {
+        rel products = </Render/OmniverseKit/HydraTextures/omni_kit_widget_viewport_ViewportTexture_0>
+    }
+
+    def "Vars"
+    {
+        def RenderVar "LdrColor" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            uniform string sourceName = "LdrColor"
+            uniform token sourceType = "raw"
+        }
+    }
+}
+
+over "OmniverseKit_Persp" (
+    prepend apiSchemas = ["OmniRtxCameraAutoExposureAPI_1", "OmniRtxCameraExposureAPI_1"]
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (0.01, 10000000)
+    float exposure:fStop = 5
+    float exposure:responsivity = 1.1026709
+    float exposure:time = 0.02
+    float focalLength = 18.147562
+    float focusDistance = 400
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -1.4789316750545887)
+    float3 xformOp:rotateXYZ = (54.73561, -6.3611094e-15, 135)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0.7169527123477385, 0.9091341954409123, 0.9354978962773591)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+def PhysicsScene "PhysicsScene" (
+    prepend apiSchemas = ["NewtonSceneAPI", "PhysxSceneAPI"]
+)
+{
+}
+
+over "OmniverseKit_Front" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (90, -1.2722219e-14, 90)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (5, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+over "OmniverseKit_Right" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (90, -1.41245e-30, 1.2722219e-14)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, -5, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+over "OmniverseKit_Top" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (-1.2722219e-14, -7.016709e-15, -90)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, 0, 5)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+

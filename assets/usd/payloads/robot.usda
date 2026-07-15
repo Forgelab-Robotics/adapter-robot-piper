@@ -1,0 +1,150 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "MuJoCo USD Converter v0.2.0"
+    }
+    defaultPrim = "PIPER"
+    doc = """Generated from Composed Stage of root layer /tmp/tmptc_8i7a8/PIPER.usdc
+
+
+Generated from Composed Stage of root layer /tmp/mjcf_import_PIPER_wi_miy4w/usdex_PIPER/PIPER.usdc
+
+
+Generated from Composed Stage of root layer /tmp/mjcf_import_PIPER_wi_miy4w/temp_PIPER/PIPER.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+over "PIPER" (
+    prepend apiSchemas = ["IsaacRobotAPI"]
+)
+{
+    prepend rel isaac:physics:robotJoints = [
+        </PIPER/Geometry/base_link/link1/joint1>,
+        </PIPER/Geometry/base_link/PhysicsFixedJoint>,
+        </PIPER/Geometry/base_link/link1/link2/joint2>,
+        </PIPER/Geometry/base_link/link1/link2/link3/joint3>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/joint4>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/link5/joint5>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/link5/link6/joint6>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/link5/link6/link7/joint7>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/link5/link6/link8/joint8>,
+    ]
+    prepend rel isaac:physics:robotLinks = [
+        </PIPER/Geometry/base_link>,
+        </PIPER/Geometry/base_link/link1>,
+        </PIPER/Geometry/base_link/link1/link2>,
+        </PIPER/Geometry/base_link/link1/link2/link3>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/link5>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/link5/link6>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/link5/link6/link7>,
+        </PIPER/Geometry/base_link/link1/link2/link3/link4/link5/link6/link8>,
+    ]
+    token isaac:robotType = "Default"
+
+    over "Geometry"
+    {
+        over "base_link" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+            over "link1" (
+                prepend apiSchemas = ["IsaacLinkAPI"]
+            )
+            {
+                over "link2" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                    over "link3" (
+                        prepend apiSchemas = ["IsaacLinkAPI"]
+                    )
+                    {
+                        over "link4" (
+                            prepend apiSchemas = ["IsaacLinkAPI"]
+                        )
+                        {
+                            over "link5" (
+                                prepend apiSchemas = ["IsaacLinkAPI"]
+                            )
+                            {
+                                over "link6" (
+                                    prepend apiSchemas = ["IsaacLinkAPI"]
+                                )
+                                {
+                                    over "link7" (
+                                        prepend apiSchemas = ["IsaacLinkAPI"]
+                                    )
+                                    {
+                                        over "joint7" (
+                                            prepend apiSchemas = ["IsaacJointAPI"]
+                                        )
+                                        {
+                                        }
+                                    }
+
+                                    over "link8" (
+                                        prepend apiSchemas = ["IsaacLinkAPI"]
+                                    )
+                                    {
+                                        over "joint8" (
+                                            prepend apiSchemas = ["IsaacJointAPI"]
+                                        )
+                                        {
+                                        }
+                                    }
+
+                                    over "joint6" (
+                                        prepend apiSchemas = ["IsaacJointAPI"]
+                                    )
+                                    {
+                                    }
+                                }
+
+                                over "joint5" (
+                                    prepend apiSchemas = ["IsaacJointAPI"]
+                                )
+                                {
+                                }
+                            }
+
+                            over "joint4" (
+                                prepend apiSchemas = ["IsaacJointAPI"]
+                            )
+                            {
+                            }
+                        }
+
+                        over "joint3" (
+                            prepend apiSchemas = ["IsaacJointAPI"]
+                        )
+                        {
+                        }
+                    }
+
+                    over "joint2" (
+                        prepend apiSchemas = ["IsaacJointAPI"]
+                    )
+                    {
+                    }
+                }
+
+                over "joint1" (
+                    prepend apiSchemas = ["IsaacJointAPI"]
+                )
+                {
+                }
+            }
+
+            over "PhysicsFixedJoint" (
+                prepend apiSchemas = ["IsaacJointAPI"]
+            )
+            {
+            }
+        }
+    }
+}
+
