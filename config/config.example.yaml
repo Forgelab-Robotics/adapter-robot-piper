@@ -9,3 +9,13 @@ is_follower: true
 
 # 是否输出调试日志
 debug: false
+
+# 生命周期位姿配置。关节单位为弧度，gripper 单位为毫米；未写关节使用默认值。
+# initial: 从臂连接使能后移动到此位，默认全 0。
+# rest: 从臂断开前移动到此安全位，默认 joint5=0.3，其余 0。
+# positions:
+#   initial:
+#     joint2: 0.5
+#     gripper: 20.0
+#   rest:
+#     joint5: 0.3

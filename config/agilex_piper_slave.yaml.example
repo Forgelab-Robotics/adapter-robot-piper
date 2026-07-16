@@ -4,3 +4,10 @@
 port: can0
 is_follower: true
 # debug: true
+
+# 生命周期位姿配置。关节单位为弧度，gripper 单位为毫米；未写关节使用默认值。
+# positions:
+#   initial:
+#     joint2: 0.5
+#   rest:
+#     joint5: 0.3
