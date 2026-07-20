@@ -17,7 +17,7 @@
 |------|------|
 | `assets/mjcf/` | MJCF、mesh、`scene.xml` |
 | `assets/glb/` | Web / 可视化 GLB（pipeline 产物 + 上游 GLB 追溯） |
-| `assets/urdf/` | URDF 预留目录；当前未固定 Agilex Piper URDF 版本 |
+| `assets/urdf/` | 官方 Piper 单臂 + 夹爪 URDF、mesh 与上游许可 |
 | `examples/01_sdk_tests/` | 直连厂商 SDK 的最小测试（与 Forge 解耦） |
 | `examples/02_dora_tests/` | Dora 节点与 Topic 集成测试 |
 | `examples/03_workflows/` | 端到端 Forge workflow（仿真 / 真机 / 同构 / VR） |
@@ -34,7 +34,8 @@ Agilex Piper 的 MJCF、mesh 与上游 GLB 已完成同步并落盘到本仓，�
 - `assets/mjcf/piper_mujoco/scene.xml`：在上游场景基础上补充 `left_pillar`、`top`、`angle` 三个固定场景相机，用于兼容既有 Forge image topic
 - `assets/glb/piper.glb`：Web / 可视化交付资产（pipeline 产物）
 - `assets/glb/piper_upstream/`：上游自带 GLB 保留追溯
-- `assets/urdf/`：当前未固定 URDF；如后续补充，请记录来源版本与 MJCF 对应关系
+- `assets/urdf/piper_with_gripper.urdf`：`piper_description` 1.0.0 单臂 + 夹爪模型；mesh 已改为仓内相对路径，不包含桌子或其他场景资产
+- `scripts/import_piper_urdf.py`：校验上游 SHA-256 后重新导入基础 URDF，并生成单臂、双臂任务构型
 
 ## 仿真接入流程
 
