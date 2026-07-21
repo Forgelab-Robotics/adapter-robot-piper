@@ -28,6 +28,16 @@ MJCF_JOINT_ORIGINS = {
     "joint7": ("0 0 0.13503", "1.5708005694 0 3.1415926"),
     "joint8": ("0 0 0.13503", "-1.5708005694 0 3.1415926"),
 }
+HARDWARE_JOINT_LIMITS = {
+    "joint1": ("-2.618", "2.618"),
+    "joint2": ("0", "3.14"),
+    "joint3": ("-2.967", "0"),
+    "joint4": ("-1.745", "1.745"),
+    "joint5": ("-1.32", "1.32"),
+    "joint6": ("-2.094", "2.094"),
+    "joint7": ("0", "0.0525"),
+    "joint8": ("-0.0525", "0"),
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,14 +68,11 @@ def load_arm(source_package: Path) -> ET.Element:
             raise ValueError(f"Source joint has no origin: {joint_name}")
         xyz, rpy = MJCF_JOINT_ORIGINS[joint_name]
         origin.attrib.update({"xyz": xyz, "rpy": rpy})
-    for joint_name, attribute, value in (
-        ("joint7", "upper", "0.0525"),
-        ("joint8", "lower", "-0.0525"),
-    ):
+    for joint_name, (lower, upper) in HARDWARE_JOINT_LIMITS.items():
         limit = robot.find(f"joint[@name='{joint_name}']/limit")
         if limit is None:
             raise ValueError(f"Source joint has no limit: {joint_name}")
-        limit.set(attribute, value)
+        limit.attrib.update({"lower": lower, "upper": upper})
     joint8 = robot.find("joint[@name='joint8']")
     if joint8 is None:
         raise ValueError("Source URDF has no joint8")
