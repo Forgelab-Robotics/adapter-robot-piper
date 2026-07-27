@@ -48,7 +48,7 @@ nodes:
       --output-kind action
 
   - id: image_viewer
-    path: ../../../../../../forge_runtime/packages/nodes/viewers/image_viewer/main.py
+    path: ${FORGE_RUNTIME_BIN}/image_viewer
     inputs:
       image/hand: task_robot/image/hand
       image/top: task_robot/image/top
