@@ -6,20 +6,25 @@ import math
 import time
 from typing import Literal
 
+from forge_common import get_logger
 from forge_msgs import JointCommand, JointState
+from forge_robot import (
+    BaseRobotDriver,
+    clip_and_validate_position_command,
+    specs_by_name,
+)
 from piper_sdk import C_PiperInterface_V2
-from forge_robot import BaseRobotDriver, clip_and_validate_position_command, specs_by_name
 
 from robots_agilex_piper.config import (
     AGILEX_PIPER_ACTUATOR_ORDER,
     AGILEX_PIPER_ACTUATOR_SPECS,
     AGILEX_PIPER_DEFAULT_POSITIONS,
 )
-from forge_common import get_logger
 
 logger = get_logger(__name__)
 
 _ACTUATOR_SPECS_DICT = specs_by_name(AGILEX_PIPER_ACTUATOR_SPECS)
+_ARM_JOINT_NAMES = tuple(AGILEX_PIPER_ACTUATOR_ORDER[:6])
 
 
 class AgilexPiperDriver(BaseRobotDriver):
@@ -62,6 +67,9 @@ class AgilexPiperDriver(BaseRobotDriver):
         self.bus: C_PiperInterface_V2 | None = None
         # Leader 模式下 get_state 不是总有数据，全 0 视为无效，用缓存
         self._state_cache: JointState | None = None
+        # Piper JointCtrl requires a complete six-axis frame. Sparse arm commands
+        # update this cache; omitted joints retain their previous target.
+        self._arm_target_cache: dict[str, float] | None = None
 
         if auto_connect:
             self.connect()
@@ -176,6 +184,9 @@ class AgilexPiperDriver(BaseRobotDriver):
         self.bus.MotionCtrl_2(0x01, 0x01, speed)
         self.bus.JointCtrl(j1, j2, j3, j4, j5, j6)
         self.bus.GripperCtrl(abs(gripper), 1000, 0x01, 0)
+        self._arm_target_cache = {
+            joint_name: action_dict[joint_name] for joint_name in _ARM_JOINT_NAMES
+        }
 
     def _connect_master_mode(self) -> None:
         logger.info("Robot configured in master mode.")
@@ -195,6 +206,7 @@ class AgilexPiperDriver(BaseRobotDriver):
         logger.info("Disabling and disconnecting from the robot...")
         self.bus.DisconnectPort()
         self.bus = None
+        self._arm_target_cache = None
         logger.info("Disconnected from the robot.")
 
     def reset(self) -> None:
@@ -203,6 +215,7 @@ class AgilexPiperDriver(BaseRobotDriver):
         logger.info("Starting homing sequence...")
         time.sleep(3)
         self.bus.MotionCtrl_1(0x02, 0, 0)
+        self._arm_target_cache = None
         logger.info("Homing command sent.")
         time.sleep(1)
 
@@ -248,23 +261,47 @@ class AgilexPiperDriver(BaseRobotDriver):
         return state
 
     def set_command(self, command: JointCommand) -> None:
-        """下发 JointCommand（弧度/毫米），内部会裁剪到限位。"""
+        """Apply a sparse position command without changing omitted actuators."""
         if self.bus is None:
             raise RuntimeError("Robot is not connected. Call connect() first.")
 
+        if getattr(command, "mode", "position") != "position":
+            raise ValueError("Agilex Piper requires JointCommand mode='position'")
         safe_command = clip_and_validate_position_command(command, _ACTUATOR_SPECS_DICT)
+        if not safe_command.position:
+            raise ValueError("Agilex Piper requires a position JointCommand")
         action_dict = dict(
-            zip(safe_command.name, safe_command.position, strict=False)
+            zip(safe_command.name, safe_command.position, strict=True)
         )
 
-        j1 = int(math.degrees(action_dict.get("joint1", 0.0)) * self.ANGLE_SCALE)
-        j2 = int(math.degrees(action_dict.get("joint2", 0.0)) * self.ANGLE_SCALE)
-        j3 = int(math.degrees(action_dict.get("joint3", 0.0)) * self.ANGLE_SCALE)
-        j4 = int(math.degrees(action_dict.get("joint4", 0.0)) * self.ANGLE_SCALE)
-        j5 = int(math.degrees(action_dict.get("joint5", 0.0)) * self.ANGLE_SCALE)
-        j6 = int(math.degrees(action_dict.get("joint6", 0.0)) * self.ANGLE_SCALE)
-        gripper = int(action_dict.get("gripper", 0.0) * self.GRIPPER_SCALE)
+        arm_updates = {
+            name: action_dict[name]
+            for name in _ARM_JOINT_NAMES
+            if name in action_dict
+        }
+        if arm_updates:
+            if len(arm_updates) == len(_ARM_JOINT_NAMES):
+                arm_targets = dict(arm_updates)
+            else:
+                if self._arm_target_cache is None:
+                    state = self.get_state()
+                    state_by_name = dict(
+                        zip(state.name, state.position, strict=True)
+                    )
+                    self._arm_target_cache = {
+                        name: state_by_name[name] for name in _ARM_JOINT_NAMES
+                    }
+                arm_targets = dict(self._arm_target_cache)
+                arm_targets.update(arm_updates)
 
-        self.bus.MotionCtrl_2(0x01, 0x01, 100, 0x00)
-        self.bus.JointCtrl(j1, j2, j3, j4, j5, j6)
-        self.bus.GripperCtrl(abs(gripper), 1000, 0x01, 0)
+            joint_values = [
+                int(math.degrees(arm_targets[name]) * self.ANGLE_SCALE)
+                for name in _ARM_JOINT_NAMES
+            ]
+            self.bus.MotionCtrl_2(0x01, 0x01, 100, 0x00)
+            self.bus.JointCtrl(*joint_values)
+            self._arm_target_cache = arm_targets
+
+        if "gripper" in action_dict:
+            gripper = int(action_dict["gripper"] * self.GRIPPER_SCALE)
+            self.bus.GripperCtrl(abs(gripper), 1000, 0x01, 0)
