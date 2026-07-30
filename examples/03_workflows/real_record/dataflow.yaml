@@ -31,8 +31,11 @@ nodes:
     args: --config agilex_piper_slave.yaml
 
   - id: mcap_recorder
-    path: ../../../../../forge_runtime/packages/nodes/recorders/mcap_recorder/main.py
-    args: --fps 30 --min-ready-topics 3 --jpeg-quality 80 --output ./logs/real_record.mcap --auto-start
+    path: ${FORGE_RUNTIME_BIN}/mcap_recorder
+    args: >-
+      --fps 30 --min-ready-topics 3 --jpeg-quality 80
+      --required-topic proprio_state --required-topic action --required-topic image/hand
+      --output ./logs/real_record.mcap --auto-start
     inputs:
       proprio_state: task_robot/proprio_state
       action: task_robot/action
