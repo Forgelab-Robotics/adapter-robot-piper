@@ -20,9 +20,9 @@ robots-agilex-piper = "robots_agilex_piper.main:main"
 robots_agilex_piper = "robots_agilex_piper.main:main"
 
 [tool.uv.sources]
-forge-common = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "v2.0.0", subdirectory = "packages/common" }
-forge-msgs = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "v2.0.0", subdirectory = "packages/msgs" }
-forge-robot = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "v2.0.0", subdirectory = "packages/robot" }
+forge-common = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "9f4203dc05b156a238f91f72b7cb28e8fce7fca9", subdirectory = "packages/common" }
+forge-msgs = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "9f4203dc05b156a238f91f72b7cb28e8fce7fca9", subdirectory = "packages/msgs" }
+forge-robot = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "9f4203dc05b156a238f91f72b7cb28e8fce7fca9", subdirectory = "packages/robot" }
 
 [project.optional-dependencies]
 pyinstaller = ["pyinstaller>=6.0"]
