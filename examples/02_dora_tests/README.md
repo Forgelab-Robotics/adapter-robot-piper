@@ -22,4 +22,4 @@ dora build dataflow.test_action_source.yaml --uv
 dora run dataflow.test_action_source.yaml --uv
 ```
 
-真机 Dora 验证需要现场 CAN 与相机设备，当前不作为离线交付阻塞项。
+真机 Dora 验证需要现场 CAN 与相机设备，当前不作为离线交付阻塞项。Dora/Forge 消息中的 `gripper` 是两指总开口米值 `0..0.105`；旧毫米制录制不能直接回放到迁移后的 follower。

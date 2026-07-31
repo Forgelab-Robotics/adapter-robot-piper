@@ -23,7 +23,7 @@ joints:
     unit: radians
   - name: gripper
     mode: prismatic
-    unit: millimeters
+    unit: meters
 
 robots:
   - id: robot_0

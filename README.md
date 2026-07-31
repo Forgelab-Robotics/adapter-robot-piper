@@ -11,6 +11,13 @@
 
 本仓以 `robot-mj-model/models/PIPER` 与既有 `forge_runtime` Agilex Piper 示例为资产和 workflow 来源，已在 `examples/03_workflows/simulation/mujoco_piper/` 提供本仓可运行配置，其 `simulator.yaml` 的 `model_path` 指向本仓 `assets/mjcf/piper_mujoco/scene.xml`。
 
+## 夹爪单位契约
+
+- Forge 层的 `gripper` 表示**两指总开口**，SI 单位为米，范围 `0..0.105 m`。
+- Piper SDK 边界保持整数 `0..105000`，每单位为 `1e-6 m`；驱动严格编解码，不接受旧毫米值。
+- MuJoCo actuator 直接接收总开口米值；`gear=2` 将总开口映射为 `joint7 = gripper / 2`，equality 保持 `joint8 = -joint7`。
+- 旧配置、action 或 MCAP 中的毫米值必须显式除以 `1000` 后再使用；本仓不会把 `40.0` 等旧值静默解释为 `40 mm`。
+
 ## 目录结构
 
 | 路径 | 说明 |

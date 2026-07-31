@@ -434,7 +434,7 @@
         <position name="robot_right/joint4" joint="robot_right/joint4" class="piper" kp="40" kv="5"/>
         <position name="robot_right/joint5" joint="robot_right/joint5" class="piper" kp="10" kv="1.5"/>
         <position name="robot_right/joint6" joint="robot_right/joint6" class="piper" kp="10" kv="1.5"/>
-        <position name="robot_right/gripper" joint="robot_right/joint7" class="finger" kp="40" kv="5"/>
+        <position name="robot_right/gripper" joint="robot_right/joint7" class="finger" inheritrange="0" ctrlrange="0 0.105" gear="2" kp="10" kv="1.25" forcerange="-5 5"/>
 
         <position name="robot_left/joint1" joint="robot_left/joint1" class="piper" kp="80" kv="5"/>
         <position name="robot_left/joint2" joint="robot_left/joint2" class="piper" kp="80" kv="5"/>
@@ -442,6 +442,6 @@
         <position name="robot_left/joint4" joint="robot_left/joint4" class="piper" kp="40" kv="5"/>
         <position name="robot_left/joint5" joint="robot_left/joint5" class="piper" kp="10" kv="1.5"/>
         <position name="robot_left/joint6" joint="robot_left/joint6" class="piper" kp="10" kv="1.5"/>
-        <position name="robot_left/gripper" joint="robot_left/joint7" class="finger" kp="40" kv="5"/>
+        <position name="robot_left/gripper" joint="robot_left/joint7" class="finger" inheritrange="0" ctrlrange="0 0.105" gear="2" kp="10" kv="1.25" forcerange="-5 5"/>
     </actuator>
 </mujoco>

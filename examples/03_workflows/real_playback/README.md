@@ -17,6 +17,7 @@
 2. `agilex_piper_slave.yaml` 的 `port` 已按现场修改。
 3. `dataflow.yaml` 中 `--mcap-path ./logs/recording.mcap` 需要替换为实际回放文件，或将文件放到该路径。
 4. 回放涉及真机运动，必须先确认急停、限位、速度和操作空间。
+5. 仅回放 `gripper` 为两指总开口米值 `0..0.105` 的新数据；旧毫米制 MCAP 必须先将该字段除以 `1000`，否则驱动会拒绝命令。
 
 ## 运行
 

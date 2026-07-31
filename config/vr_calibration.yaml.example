@@ -19,6 +19,12 @@ rotation_controller_to_base:
 scale:
   translation: 1.0
 
+# VR / 同构控制若输出 Forge gripper，语义必须是两指总开口（米），范围 0..0.105。
+# 例如半开为 0.0525；不要输出旧毫米值 52.5。
+gripper:
+  closed: 0.0
+  open: 0.105
+
 # 末端外参：工具坐标系相对法兰（t_ee 或 T_flange_ee）
 t_ee:
   translation: [0.0, 0.0, 0.0]

@@ -15,5 +15,7 @@
 | 真机回放 / 从臂 | `real_playback/` | 本仓已复制 dataflow，用回放 action 驱动 follower Agilex Piper |
 | PhyAgentOS bridge | `forge_runtime/examples/phyagentos_forge_bridge/` | 复用同一 joint order：`joint1` ~ `joint6`、`gripper` |
 
+所有 workflow 的 `gripper` 均表示两指总开口米值 `0..0.105`。旧毫米制 MCAP/action 需先除以 `1000`，不得直接回放。
+
 仿真检查记录见 `simulation/JOINT_SWEEP_CHECKLIST.md`。
 仿真交付记录与 Forge 对接说明见 `simulation/SIMULATION_INTEGRATION.md`；`simulation/simulator.agilex_piper.example.yaml` 为 MuJoCo 节点配置骨架（完整示例以 **`mujoco_piper/simulator.yaml`** 为准）。

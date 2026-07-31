@@ -15,6 +15,11 @@ from forge_robot import (
 )
 from piper_sdk import C_PiperInterface_V2
 
+from robots_agilex_piper.codec import (
+    GRIPPER_SDK_UNITS_PER_METER,
+    gripper_meters_to_sdk,
+    gripper_sdk_to_meters,
+)
 from robots_agilex_piper.config import (
     AGILEX_PIPER_ACTUATOR_ORDER,
     AGILEX_PIPER_ACTUATOR_SPECS,
@@ -27,12 +32,19 @@ _ACTUATOR_SPECS_DICT = specs_by_name(AGILEX_PIPER_ACTUATOR_SPECS)
 _ARM_JOINT_NAMES = tuple(AGILEX_PIPER_ACTUATOR_ORDER[:6])
 
 
+def _validate_requested_gripper_position(command: JointCommand) -> None:
+    if "gripper" not in command.name or not command.position:
+        return
+    positions = dict(zip(command.name, command.position, strict=True))
+    gripper_meters_to_sdk(positions["gripper"])
+
+
 class AgilexPiperDriver(BaseRobotDriver):
     """
     Agilex Piper 机械臂硬件驱动。
 
     通过 CAN 与 piper-sdk 通信。主从：role="slave"（从站）连接后使能；
-    role="master"（主站）仅连接不使能。单位：关节弧度、夹爪毫米。
+    role="master"（主站）仅连接不使能。单位：关节弧度、夹爪两指总开口米。
     """
 
     @property
@@ -40,7 +52,7 @@ class AgilexPiperDriver(BaseRobotDriver):
         return list(AGILEX_PIPER_ACTUATOR_ORDER)
 
     ANGLE_SCALE = 1000.0
-    GRIPPER_SCALE = 1000.0
+    GRIPPER_SCALE = GRIPPER_SDK_UNITS_PER_METER
 
     _LINKAGE_MASTER = 0xFA
     _LINKAGE_SLAVE = 0xFC
@@ -64,6 +76,7 @@ class AgilexPiperDriver(BaseRobotDriver):
         )
         self.port = port
         self._positions = self._resolve_positions(positions)
+        self._validate_lifecycle_positions()
         self.bus: C_PiperInterface_V2 | None = None
         # Leader 模式下 get_state 不是总有数据，全 0 视为无效，用缓存
         self._state_cache: JointState | None = None
@@ -83,29 +96,101 @@ class AgilexPiperDriver(BaseRobotDriver):
             for name, position in AGILEX_PIPER_DEFAULT_POSITIONS.items()
         }
         if positions:
+            allowed_actuators = set(AGILEX_PIPER_ACTUATOR_ORDER)
             for name, position in positions.items():
-                if name in resolved:
-                    resolved[name].update(position)
+                if name not in resolved:
+                    raise ValueError(f"Unknown lifecycle position: {name}")
+                unknown_actuators = sorted(set(position) - allowed_actuators)
+                if unknown_actuators:
+                    raise ValueError(
+                        f"Unknown actuators in lifecycle position {name}: "
+                        f"{unknown_actuators}"
+                    )
+                resolved[name].update(position)
         return resolved
+
+    def _prepare_lifecycle_position(
+        self,
+        target: dict[str, float],
+    ) -> tuple[dict[str, float], tuple[int, ...], int]:
+        # Validate the requested opening before the generic actuator validator can
+        # clip it; accepting legacy millimeter values here would be unsafe.
+        gripper_meters_to_sdk(target.get("gripper", 0.0))
+        command = JointCommand(
+            name=self.joint_order,
+            mode="position",
+            position=[target.get(actuator, 0.0) for actuator in self.joint_order],
+            velocity=[],
+            effort=[],
+            kp=[],
+            kd=[],
+        )
+        safe_command = clip_and_validate_position_command(command, _ACTUATOR_SPECS_DICT)
+        action_dict = dict(zip(safe_command.name, safe_command.position, strict=True))
+        joint_values = tuple(
+            int(math.degrees(action_dict[name]) * self.ANGLE_SCALE)
+            for name in _ARM_JOINT_NAMES
+        )
+        gripper = gripper_meters_to_sdk(action_dict["gripper"])
+        return action_dict, joint_values, gripper
+
+    def _validate_lifecycle_positions(self) -> None:
+        for name in AGILEX_PIPER_DEFAULT_POSITIONS:
+            self._prepare_lifecycle_position(self._positions[name])
 
     def connect(self) -> None:
         if self.bus is not None:
             logger.warning("Robot is already connected.")
             return
 
-        self.bus = C_PiperInterface_V2(self.port)
-        logger.info("Connecting to Agilex Piper robot at port %s...", self.port)
-        self.bus.ConnectPort()
+        self._validate_lifecycle_positions()
+        bus = C_PiperInterface_V2(self.port)
+        self.bus = bus
+        should_disable_on_failure = False
+        try:
+            logger.info("Connecting to Agilex Piper robot at port %s...", self.port)
+            bus.ConnectPort()
 
-        linkage = self._LINKAGE_SLAVE if self.is_follower else self._LINKAGE_MASTER
-        self.bus.MasterSlaveConfig(linkage, 0, 0, 0)
+            linkage = self._LINKAGE_SLAVE if self.is_follower else self._LINKAGE_MASTER
+            bus.MasterSlaveConfig(linkage, 0, 0, 0)
 
-        if self.is_follower:
-            self._connect_follower_mode()
-            logger.info("Successfully connected and enabled the robot (slave).")
-        else:
-            self._connect_master_mode()
-            logger.info("Successfully connected (master, not enabled).")
+            if self.is_follower:
+                should_disable_on_failure = True
+                self._connect_follower_mode()
+                logger.info("Successfully connected and enabled the robot (slave).")
+            else:
+                self._connect_master_mode()
+                logger.info("Successfully connected (master, not enabled).")
+        except BaseException:
+            self._rollback_failed_connect(
+                bus,
+                disable=should_disable_on_failure,
+            )
+            raise
+
+    def _rollback_failed_connect(
+        self,
+        bus: C_PiperInterface_V2,
+        *,
+        disable: bool,
+    ) -> None:
+        if disable:
+            try:
+                bus.DisablePiper()
+            except BaseException as error:  # noqa: BLE001 - preserve setup error.
+                logger.error(
+                    "Failed to disable robot during connect rollback: %s", error
+                )
+
+        try:
+            bus.DisconnectPort()
+        except BaseException as error:  # noqa: BLE001 - preserve setup error.
+            logger.error(
+                "Failed to disconnect robot during connect rollback: %s", error
+            )
+        finally:
+            self.bus = None
+            self._arm_target_cache = None
 
     # EnablePiper 等待超时时间（秒），超时后尝试 ResetPiper 再重试一次
     _ENABLE_AGILEX_PIPER_TIMEOUT_SEC = 2.0
@@ -154,36 +239,16 @@ class AgilexPiperDriver(BaseRobotDriver):
         *,
         speed: int,
     ) -> None:
-        """下发生命周期位姿，单位为关节弧度、夹爪毫米。"""
+        """下发生命周期位姿，单位为关节弧度、夹爪两指总开口米。"""
         if self.bus is None:
             raise RuntimeError("Robot is not connected. Call connect() first.")
 
-        command = JointCommand(
-            name=self.joint_order,
-            mode="position",
-            position=[target.get(actuator, 0.0) for actuator in self.joint_order],
-            velocity=[],
-            effort=[],
-            kp=[],
-            kd=[],
-        )
-        safe_command = clip_and_validate_position_command(command, _ACTUATOR_SPECS_DICT)
-        action_dict = dict(
-            zip(safe_command.name, safe_command.position, strict=False)
-        )
-
-        j1 = int(math.degrees(action_dict.get("joint1", 0.0)) * self.ANGLE_SCALE)
-        j2 = int(math.degrees(action_dict.get("joint2", 0.0)) * self.ANGLE_SCALE)
-        j3 = int(math.degrees(action_dict.get("joint3", 0.0)) * self.ANGLE_SCALE)
-        j4 = int(math.degrees(action_dict.get("joint4", 0.0)) * self.ANGLE_SCALE)
-        j5 = int(math.degrees(action_dict.get("joint5", 0.0)) * self.ANGLE_SCALE)
-        j6 = int(math.degrees(action_dict.get("joint6", 0.0)) * self.ANGLE_SCALE)
-        gripper = int(action_dict.get("gripper", 0.0) * self.GRIPPER_SCALE)
+        action_dict, joint_values, gripper = self._prepare_lifecycle_position(target)
 
         logger.info("Moving robot to %s position: %s", name, action_dict)
         self.bus.MotionCtrl_2(0x01, 0x01, speed)
-        self.bus.JointCtrl(j1, j2, j3, j4, j5, j6)
-        self.bus.GripperCtrl(abs(gripper), 1000, 0x01, 0)
+        self.bus.JointCtrl(*joint_values)
+        self.bus.GripperCtrl(gripper, 1000, 0x01, 0)
         self._arm_target_cache = {
             joint_name: action_dict[joint_name] for joint_name in _ARM_JOINT_NAMES
         }
@@ -200,7 +265,7 @@ class AgilexPiperDriver(BaseRobotDriver):
             logger.info("Safety sequence: Moving to rest position before disable...")
             try:
                 self.move_to_rest_position()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - disconnect must continue.
                 logger.error("Failed to move to rest position: %s", e)
 
         logger.info("Disabling and disconnecting from the robot...")
@@ -220,7 +285,7 @@ class AgilexPiperDriver(BaseRobotDriver):
         time.sleep(1)
 
     def get_state(self) -> JointState:
-        """从硬件读取状态，转为 JointState（弧度/毫米）。Leader 模式下全 0 视为无效，返回缓存。"""
+        """从硬件读取状态，转为 JointState（弧度/夹爪总开口米）。Leader 全 0 时返回缓存。"""
         if self.bus is None:
             raise RuntimeError("Robot is not connected. Call connect() first.")
 
@@ -239,10 +304,10 @@ class AgilexPiperDriver(BaseRobotDriver):
                 and joints.joint_5 == 0
                 and joints.joint_6 == 0
                 and gripper.grippers_angle == 0
+                and self._state_cache is not None
             ):
-                if self._state_cache is not None:
-                    return self._state_cache
-                # 无缓存时仍返回全 0 的 state，避免调用方报错
+                return self._state_cache
+            # 全 0 且无缓存时仍返回全 0 的 state，避免调用方报错
 
         state = JointState(
             name=self.joint_order,
@@ -253,7 +318,7 @@ class AgilexPiperDriver(BaseRobotDriver):
                 math.radians(joints.joint_4 / self.ANGLE_SCALE),
                 math.radians(joints.joint_5 / self.ANGLE_SCALE),
                 math.radians(joints.joint_6 / self.ANGLE_SCALE),
-                gripper.grippers_angle / self.GRIPPER_SCALE,
+                gripper_sdk_to_meters(gripper.grippers_angle),
             ],
         )
         if not self.is_follower:
@@ -267,17 +332,14 @@ class AgilexPiperDriver(BaseRobotDriver):
 
         if getattr(command, "mode", "position") != "position":
             raise ValueError("Agilex Piper requires JointCommand mode='position'")
+        _validate_requested_gripper_position(command)
         safe_command = clip_and_validate_position_command(command, _ACTUATOR_SPECS_DICT)
         if not safe_command.position:
             raise ValueError("Agilex Piper requires a position JointCommand")
-        action_dict = dict(
-            zip(safe_command.name, safe_command.position, strict=True)
-        )
+        action_dict = dict(zip(safe_command.name, safe_command.position, strict=True))
 
         arm_updates = {
-            name: action_dict[name]
-            for name in _ARM_JOINT_NAMES
-            if name in action_dict
+            name: action_dict[name] for name in _ARM_JOINT_NAMES if name in action_dict
         }
         if arm_updates:
             if len(arm_updates) == len(_ARM_JOINT_NAMES):
@@ -285,9 +347,7 @@ class AgilexPiperDriver(BaseRobotDriver):
             else:
                 if self._arm_target_cache is None:
                     state = self.get_state()
-                    state_by_name = dict(
-                        zip(state.name, state.position, strict=True)
-                    )
+                    state_by_name = dict(zip(state.name, state.position, strict=True))
                     self._arm_target_cache = {
                         name: state_by_name[name] for name in _ARM_JOINT_NAMES
                     }
@@ -303,5 +363,5 @@ class AgilexPiperDriver(BaseRobotDriver):
             self._arm_target_cache = arm_targets
 
         if "gripper" in action_dict:
-            gripper = int(action_dict["gripper"] * self.GRIPPER_SCALE)
-            self.bus.GripperCtrl(abs(gripper), 1000, 0x01, 0)
+            gripper = gripper_meters_to_sdk(action_dict["gripper"])
+            self.bus.GripperCtrl(gripper, 1000, 0x01, 0)

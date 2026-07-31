@@ -10,9 +10,9 @@ import sys
 import termios
 import time
 import tty
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from collections.abc import Iterator
 from typing import Literal
 
 from forge_robot.device_tools import (
@@ -20,6 +20,11 @@ from forge_robot.device_tools import (
     error_result,
     ok_result,
     print_json_result,
+)
+
+from robots_agilex_piper.codec import (
+    gripper_meters_to_sdk,
+    gripper_sdk_to_meters,
 )
 
 _LIST_CAN_SCRIPT = r"""
@@ -61,7 +66,7 @@ _LINKAGE_MASTER = 0xFA
 _LINKAGE_SLAVE = 0xFC
 _ENABLE_AGILEX_PIPER_TIMEOUT_SEC = 2.0
 _ANGLE_SCALE = 1000.0
-_POSITION_SCALE = 1000.0
+_EE_MILLIMETERS_SCALE = 1000.0
 _JOINT_NAMES = ("joint1", "joint2", "joint3", "joint4", "joint5", "joint6")
 _DEFAULT_WATCH_STATE_SAVE_PATH = "agilex_piper_watch_state.jsonl"
 
@@ -74,6 +79,7 @@ def _query_can_devices() -> list[dict]:
             capture_output=True,
             text=True,
             timeout=10,
+            check=False,
         )
         devices: list[dict] = []
         if out.returncode == 0 and out.stdout.strip():
@@ -88,7 +94,7 @@ def _query_can_devices() -> list[dict]:
                         )
                     )
         return devices
-    except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
+    except Exception:  # noqa: BLE001 - discovery failures mean no devices.
         return []
 
 
@@ -125,6 +131,7 @@ def cmd_activate_devices(*, use_json: bool = True) -> int:
             capture_output=True,
             text=True,
             timeout=60,
+            check=False,
         )
         stdout = (proc.stdout or "").strip()
         stderr = (proc.stderr or "").strip()
@@ -146,7 +153,7 @@ def cmd_activate_devices(*, use_json: bool = True) -> int:
     except subprocess.TimeoutExpired:
         result = error_result("Activation timed out", devices=[])
         exit_code = 1
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI returns structured errors.
         result = error_result(str(e), devices=[])
         exit_code = 1
 
@@ -160,12 +167,16 @@ def cmd_activate_devices(*, use_json: bool = True) -> int:
     return exit_code
 
 
-def _scaled_radians(raw_value: float | int) -> float:
+def _scaled_radians(raw_value: float) -> float:
     return math.radians(float(raw_value) / _ANGLE_SCALE)
 
 
-def _scaled_mm(raw_value: float | int) -> float:
-    return float(raw_value) / _POSITION_SCALE
+def _scaled_ee_mm(raw_value: float) -> float:
+    return float(raw_value) / _EE_MILLIMETERS_SCALE
+
+
+def _scaled_gripper_m(raw_value: int) -> float:
+    return gripper_sdk_to_meters(raw_value)
 
 
 def _read_joint_and_gripper(
@@ -184,16 +195,16 @@ def _read_joint_and_gripper(
         "joint5": _scaled_radians(joints.joint_5),
         "joint6": _scaled_radians(joints.joint_6),
     }
-    return joint_values, _scaled_mm(gripper.grippers_angle)
+    return joint_values, _scaled_gripper_m(gripper.grippers_angle)
 
 
 def _read_ee_pose(agilex_piper: object) -> dict[str, float]:
     end_pose_msg = agilex_piper.GetArmEndPoseMsgs()
     end_pose = end_pose_msg.end_pose
     return {
-        "x": _scaled_mm(end_pose.X_axis),
-        "y": _scaled_mm(end_pose.Y_axis),
-        "z": _scaled_mm(end_pose.Z_axis),
+        "x": _scaled_ee_mm(end_pose.X_axis),
+        "y": _scaled_ee_mm(end_pose.Y_axis),
+        "z": _scaled_ee_mm(end_pose.Z_axis),
         "rx": _scaled_radians(end_pose.RX_axis),
         "ry": _scaled_radians(end_pose.RY_axis),
         "rz": _scaled_radians(end_pose.RZ_axis),
@@ -275,7 +286,7 @@ def _format_watch_state(
     lines.extend(
         [
             "",
-            f"gripper (mm) {frame['gripper']:> .3f}",
+            f"gripper total opening (m) {frame['gripper']:> .6f}",
             "",
             "ee position (mm)",
             f"  x  {frame['ee']['x']:> .3f}",
@@ -367,7 +378,7 @@ def _verify_agilex_piper_online(port: str, wait_s: float = 0.08) -> bool:
             return maxspd.time_stamp != 0
         finally:
             agilex_piper.DisconnectPort()
-    except Exception:
+    except Exception:  # noqa: BLE001 - hardware probe failures mean offline.
         return False
 
 
@@ -412,10 +423,12 @@ def cmd_check_role(
                         break
                     role = "Master"
             bus.shutdown()
-        except Exception:
+        except Exception:  # noqa: BLE001 - CAN probe failures mean offline.
             role = "Offline"
 
-        if role in ("Slave", "Master") and not _verify_agilex_piper_online(can_interface):
+        if role in ("Slave", "Master") and not _verify_agilex_piper_online(
+            can_interface
+        ):
             role = "Offline"
 
         devices.append(
@@ -464,7 +477,7 @@ def cmd_set_role(
             devices=[address_info(name=port, role=role)],
         )
         exit_code = 0
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI returns structured errors.
         result = error_result(
             str(e),
             devices=[address_info(name=port, role=role)],
@@ -523,7 +536,7 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
     agilex_piper.GripperCtrl(0, 1000, 0x01, 0)
     time.sleep(0.5)
 
-    range_hw = int(0.05 * 1000 * 1000)
+    range_hw = gripper_meters_to_sdk(0.05)
     count = 0
     phase = 0
     step_loops = 300
@@ -540,7 +553,7 @@ def cmd_test(port: str = "can0", duration: float = 15.0) -> int:
                 count = -1
             count += 1
             range_val = 0 if (phase == 0 or phase == 2) else range_hw
-            agilex_piper.GripperCtrl(abs(range_val), 1000, 0x01, 0)
+            agilex_piper.GripperCtrl(range_val, 1000, 0x01, 0)
             time.sleep(0.005)
     finally:
         agilex_piper.GripperCtrl(0, 1000, 0x01, 0)

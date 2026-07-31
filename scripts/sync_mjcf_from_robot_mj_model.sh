@@ -15,7 +15,8 @@ fi
 mkdir -p "$DST"
 # 不把 *.glb 同步进 mjcf/：GLB 由本仓 assets/glb/piper_upstream/ 维护（见 assets/glb/README.md）
 rsync -a --delete --exclude='*.glb' "$SRC/" "$DST/"
+python3 "$ROOT/scripts/patch_mjcf_gripper_actuators.py" "$DST"
 echo "Synced MJCF assets:"
 echo "  from: $SRC"
 echo "  to:   $DST"
-echo "  (excluded *.glb; copy GLB from upstream manually to assets/glb/piper_upstream/ if updated)"
+echo "  (excluded *.glb; reapplied local gripper total-opening actuator semantics)"

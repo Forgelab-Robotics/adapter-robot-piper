@@ -3,5 +3,6 @@
 
 # model_path: /absolute/path/to/robots/agilex_piper/assets/mjcf/piper_mujoco/scene.xml
 
-# 若仍使用 forge_runtime 内置副本（与 monorepo 中已存在示例一致）：
+# 本仓模型的 gripper actuator 控制两指总开口 0..0.105 m；配套状态 state_scale 应为 1.0。
+# 若仍使用 forge_runtime 内置副本，须先确认其 actuator 已迁移为相同语义：
 # model_path: ../../../../assets/mjcf/piper_mujoco/scene.xml

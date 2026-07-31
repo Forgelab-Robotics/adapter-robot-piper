@@ -18,10 +18,11 @@ joints:
   - { name: joint6, mode: position, unit: radians }
   - name: gripper
     mode: prismatic
-    unit: millimeters
+    unit: meters
+    # 两指总开口：joint7 - joint8，模型 equality 令 joint8 = -joint7。
     state_from_joints: [joint7, joint8]
     state_expr: diff
-    state_scale: 1000.0
+    state_scale: 1.0
 
 robots:
   - id: robot_0

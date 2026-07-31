@@ -20,3 +20,5 @@ uv run robots-agilex-piper test can0 --duration 15
 ```
 
 上述测试依赖真机上电、急停释放、CAN 设备已激活；实机结果应记录到 MR 或 `config/` 中，不提交现场私有端口/标定密钥。
+
+单位边界：Forge `gripper` 为两指总开口 `0..0.105 m`，SDK `GripperCtrl` / `grippers_angle` 为 `0..105000`（每单位 `1e-6 m`）。底层示例若直接调用 SDK，应传 SDK 整数，不要传 Forge 米值。

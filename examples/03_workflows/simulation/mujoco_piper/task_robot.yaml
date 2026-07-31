@@ -6,7 +6,7 @@ joints:
   - { name: joint4, mode: position, unit: radians }
   - { name: joint5, mode: position, unit: radians }
   - { name: joint6, mode: position, unit: radians }
-  - { name: gripper, mode: prismatic, unit: millimeters }
+  - { name: gripper, mode: prismatic, unit: meters }
 
 robots:
   - id: robot_0

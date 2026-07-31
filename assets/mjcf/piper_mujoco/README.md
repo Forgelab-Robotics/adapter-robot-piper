@@ -13,6 +13,10 @@
 |- Variant: 拓展模型
 ```
 
+### 本仓控制语义
+
+`gripper` position actuator 控制两指总开口 `0..0.105 m`，通过 `gear=2` 映射到 `joint7`；`joint8 = -joint7` 的 equality 与两指各自 `0.0525 m` 限位保持不变。为近似保持迁移前的 joint-space 动态，夹爪使用 `kp=10`、`kv=1.25`、`forcerange=-5 5`。
+
 ### 资料来源
 
 https://github.com/google-deepmind/mujoco_menagerie/tree/main/agilex_piper

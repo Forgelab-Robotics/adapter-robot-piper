@@ -434,7 +434,7 @@
         <position name="left/joint4" joint="left/joint4" class="piper" kp="40" kv="5"/>
         <position name="left/joint5" joint="left/joint5" class="piper" kp="10" kv="1.5"/>
         <position name="left/joint6" joint="left/joint6" class="piper" kp="10" kv="1.5"/>
-        <position name="left/gripper" joint="left/joint7" class="finger" kp="40" kv="5"/>
+        <position name="left/gripper" joint="left/joint7" class="finger" inheritrange="0" ctrlrange="0 0.105" gear="2" kp="10" kv="1.25" forcerange="-5 5"/>
 
         <position name="right/joint1" joint="right/joint1" class="piper" kp="80" kv="5"/>
         <position name="right/joint2" joint="right/joint2" class="piper" kp="80" kv="5"/>
@@ -442,6 +442,6 @@
         <position name="right/joint4" joint="right/joint4" class="piper" kp="40" kv="5"/>
         <position name="right/joint5" joint="right/joint5" class="piper" kp="10" kv="1.5"/>
         <position name="right/joint6" joint="right/joint6" class="piper" kp="10" kv="1.5"/>
-        <position name="right/gripper" joint="right/joint7" class="finger" kp="40" kv="5"/>
+        <position name="right/gripper" joint="right/joint7" class="finger" inheritrange="0" ctrlrange="0 0.105" gear="2" kp="10" kv="1.25" forcerange="-5 5"/>
     </actuator>
 </mujoco>

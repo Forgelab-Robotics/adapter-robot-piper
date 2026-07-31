@@ -36,16 +36,14 @@ nodes:
     args: --config task_robot.yaml
 
   - id: test_action_source
-    path: ../../../../../../forge_runtime/packages/nodes/test_action_source/main.py
+    # 仓内专用 source 为每个 actuator 使用合法范围；gripper 单独使用 0..0.105 m。
+    path: test_action_source.py
     inputs:
       tick: dora/timer/millis/200
       proprio_state: task_robot/proprio_state
     outputs:
       - action
-    args: >-
-      --joint-order joint1 joint2 joint3 joint4 joint5 joint6 gripper
-      --mode sweep
-      --output-kind action
+    args: --joint-seconds 2
 
   - id: image_viewer
     path: ${FORGE_RUNTIME_BIN}/image_viewer

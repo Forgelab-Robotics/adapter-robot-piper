@@ -8,8 +8,13 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from forge_robot import ActuatorSpec
+
+from robots_agilex_piper.codec import (
+    GRIPPER_MAX_OPENING_METERS,
+    GRIPPER_MIN_OPENING_METERS,
+    validate_gripper_opening_meters,
+)
 
 AGILEX_PIPER_ACTUATOR_SPECS = (
     ActuatorSpec(
@@ -51,9 +56,9 @@ AGILEX_PIPER_ACTUATOR_SPECS = (
     ActuatorSpec(
         name="gripper",
         kind="prismatic",
-        position_unit="millimeters",
-        min_position=0.0,
-        max_position=105.0,
+        position_unit="meters",
+        min_position=GRIPPER_MIN_OPENING_METERS,
+        max_position=GRIPPER_MAX_OPENING_METERS,
     ),
 )
 
@@ -78,7 +83,7 @@ def _parse_positions(data: Any) -> dict[str, dict[str, float]] | None:
     if data is None:
         return None
     if not isinstance(data, dict):
-        raise ValueError("positions 必须是字典。")
+        raise ValueError("positions 必须是字典。")  # noqa: TRY004
 
     allowed_position_names = set(AGILEX_PIPER_DEFAULT_POSITIONS)
     allowed_actuator_names = set(AGILEX_PIPER_ACTUATOR_ORDER)
@@ -91,7 +96,7 @@ def _parse_positions(data: Any) -> dict[str, dict[str, float]] | None:
                 f"未知 positions 名称: {name}，可用值: {sorted(allowed_position_names)}"
             )
         if not isinstance(position, dict):
-            raise ValueError(f"positions.{name} 必须是字典。")
+            raise ValueError(f"positions.{name} 必须是字典。")  # noqa: TRY004
 
         parsed_position: dict[str, float] = {}
         for actuator_name, value in position.items():
@@ -100,7 +105,10 @@ def _parse_positions(data: Any) -> dict[str, dict[str, float]] | None:
                 raise ValueError(
                     f"未知 actuator 名称: {key}，可用值: {AGILEX_PIPER_ACTUATOR_ORDER}"
                 )
-            parsed_position[key] = float(value)
+            parsed_value = float(value)
+            if key == "gripper":
+                parsed_value = validate_gripper_opening_meters(parsed_value)
+            parsed_position[key] = parsed_value
         parsed[name] = parsed_position
 
     return parsed
@@ -117,7 +125,7 @@ class AgilexPiperNodeConfig:
     positions: dict[str, dict[str, float]] | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "AgilexPiperNodeConfig":
+    def from_dict(cls, data: dict[str, Any]) -> AgilexPiperNodeConfig:
         """从字典解析配置。"""
         port = data.get("port", "can0")
         is_follower = data.get("is_follower", True)
@@ -143,7 +151,7 @@ class AgilexPiperNodeConfig:
         return position
 
     @classmethod
-    def from_yaml_path(cls, path: str | Path) -> "AgilexPiperNodeConfig":
+    def from_yaml_path(cls, path: str | Path) -> AgilexPiperNodeConfig:
         """从 YAML 文件加载配置。"""
         p = Path(path)
         if not p.exists():

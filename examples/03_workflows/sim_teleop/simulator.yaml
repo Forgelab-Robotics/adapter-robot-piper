@@ -9,7 +9,7 @@ model_path: ../../../assets/mjcf/piper_mujoco/scene.xml
 # 控制周期频率（Hz），与 dataflow 中 tick: dora/timer/millis/20 对应 50Hz
 control_hz: 50
 
-# 与 policy.yaml 一致：每个关节的 name / mode / unit（gripper 为 millimeters）
+# 与 policy.yaml 一致：每个关节的 name / mode / unit（gripper 为两指总开口 meters）
 joints:
   - name: joint1
     mode: position
@@ -31,13 +31,12 @@ joints:
     unit: radians
   - name: gripper
     mode: prismatic
-    unit: millimeters
-    # gripper 由 joint7 / joint8 的开度合成：
-    #   value_raw = qpos[joint7] - qpos[joint8]  （joint8 = -joint7 时约等于 2 * joint7）
-    #   value = value_raw * state_scale          （米 → 毫米）
+    unit: meters
+    # gripper 为两指总开口：
+    #   value = qpos[joint7] - qpos[joint8]  （joint8 = -joint7 时等于 2 * joint7）
     state_from_joints: ["joint7", "joint8"]
     state_expr: diff
-    state_scale: 1000.0
+    state_scale: 1.0
 
 robots:
   - id: robot_0

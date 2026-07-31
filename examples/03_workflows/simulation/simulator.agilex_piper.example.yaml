@@ -4,6 +4,8 @@
 model_path: /ABS/PATH/TO/robots/agilex_piper/assets/mjcf/piper_mujoco/scene.xml
 control_hz: 50
 
+# 完整配置中的 gripper 必须使用 unit: meters、state_expr: diff、state_scale: 1.0。
+# 其值表示两指总开口 0..0.105 m，而不是旧毫米值。
 joints: []
 
 robots:

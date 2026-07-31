@@ -19,6 +19,7 @@
 2. `agilex_piper_master.yaml` / `agilex_piper_slave.yaml` 的 `port` 已按现场修改。
 3. 摄像头设备与 `camera.yaml` 一致。
 4. `dataflow.yaml` 中的 `camera_hand` 依赖 `forge_runtime/target/release/forge-runtime-camera`。当前开发机未检测到该 release 产物；真机录制前需先在 `forge_runtime` 构建 camera 节点，或按现场 camera 节点实现替换该路径。
+5. 新录制的 `gripper` 字段为两指总开口米值 `0..0.105`；不要与旧毫米制数据混用。
 
 ## 运行
 
