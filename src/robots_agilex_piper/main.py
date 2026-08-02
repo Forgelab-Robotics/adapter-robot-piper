@@ -4,11 +4,19 @@
 from __future__ import annotations
 
 import sys
+from importlib.metadata import version as distribution_version
 
 import typer
 from forge_common import get_logger
 
 logger = get_logger(__name__)
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        typer.echo(f"agilex-piper {distribution_version('agilex-piper')}")
+        raise typer.Exit()
+
 
 app = typer.Typer(
     name="robots_agilex_piper",
@@ -47,6 +55,13 @@ def _run_node(config_path: str | None) -> int:
 def _main(
     ctx: typer.Context,
     config: str | None = typer.Option(None, "--config", help="YAML 配置文件路径"),
+    version: bool = typer.Option(
+        False,
+        "--version",
+        callback=_version_callback,
+        is_eager=True,
+        help="显示版本并退出",
+    ),
 ) -> None:
     """无子命令时默认运行 Agilex Piper dora 节点。"""
     if ctx.invoked_subcommand is not None:

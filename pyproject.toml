@@ -1,15 +1,15 @@
 [project]
 name = "agilex-piper"
-version = "0.2.0"
+version = "1.0.0"
 description = "Agilex Piper Robot configuration and teleop workflow"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
 	"dora-rs>=0.4.1",
 	"typer>=0.25.1",
-	"forge-common",
-	"forge-msgs",
-	"forge-robot",
+	"forge-common>=1.0.0,<2",
+	"forge-msgs>=1.0.0,<2",
+	"forge-robot>=1.0.0,<2",
 	"piper-sdk>=0.6.1",
 	"pyyaml>=6.0",
 	"python-can>=4.0",
@@ -20,13 +20,13 @@ robots-agilex-piper = "robots_agilex_piper.main:main"
 robots_agilex_piper = "robots_agilex_piper.main:main"
 
 [tool.uv.sources]
-forge-common = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "9f4203dc05b156a238f91f72b7cb28e8fce7fca9", subdirectory = "packages/common" }
-forge-msgs = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "9f4203dc05b156a238f91f72b7cb28e8fce7fca9", subdirectory = "packages/msgs" }
-forge-robot = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", rev = "9f4203dc05b156a238f91f72b7cb28e8fce7fca9", subdirectory = "packages/robot" }
+forge-common = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", tag = "forge-common-v1.0.0", subdirectory = "packages/common" }
+forge-msgs = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", tag = "forge-msgs-v1.0.0", subdirectory = "packages/msgs" }
+forge-robot = { git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git", tag = "forge-robot-v1.0.0", subdirectory = "packages/robot" }
 
 [project.optional-dependencies]
 pyinstaller = ["pyinstaller>=6.0"]
-test = ["mujoco>=3.3.0"]
+test = ["mujoco>=3.3.0", "pytest>=8.0"]
 
 [build-system]
 requires = ["uv_build>=0.8.17,<0.9.0"]

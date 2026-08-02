@@ -18,11 +18,13 @@ rm -f "${DIST_DIR}/robots_agilex_piper" "${DIST_DIR}/robots_agilex_piper.exe"
 rm -rf "${VENV_DIR}"
 trap 'rm -rf "${VENV_DIR}"' EXIT
 
-echo "==> [robots_agilex_piper] 正在初始化隔离的局部构建虚拟环境..."
-uv venv --no-workspace "${VENV_DIR}" --python 3.12
-
-echo "==> [robots_agilex_piper] 正在安装本地依赖和 PyInstaller..."
-uv pip install --python "${VENV_DIR}/bin/python" -r "${PACKAGE_DIR}/pyproject.toml" pyinstaller
+echo "==> [robots_agilex_piper] 正在同步锁定的隔离构建环境..."
+UV_PROJECT_ENVIRONMENT="${VENV_DIR}" uv sync \
+  --project "${PACKAGE_DIR}" \
+  --frozen \
+  --no-dev \
+  --extra pyinstaller \
+  --python 3.12
 
 echo "==> [robots_agilex_piper] 开始使用 PyInstaller 进行打包..."
 "${VENV_DIR}/bin/pyinstaller" \

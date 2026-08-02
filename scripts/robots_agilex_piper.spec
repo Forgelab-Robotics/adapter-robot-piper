@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import os
 
+from PyInstaller.utils.hooks import copy_metadata
+
 _spec_dir = os.path.dirname(os.path.abspath(SPEC))
 _package_dir = os.path.dirname(_spec_dir)
 _src_dir = os.path.join(_package_dir, "src")
@@ -16,6 +18,7 @@ a = Analysis(
     [os.path.join(_src_dir, "robots_agilex_piper", "main.py")],
     pathex=[_src_dir, _package_dir],
     binaries=[],
+    datas=copy_metadata("agilex-piper"),
     hiddenimports=[
         "robots_agilex_piper",
         "robots_agilex_piper.config",
