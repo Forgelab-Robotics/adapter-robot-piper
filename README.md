@@ -18,6 +18,13 @@
 - MuJoCo actuator 直接接收总开口米值；`gear=2` 将总开口映射为 `joint7 = gripper / 2`，equality 保持 `joint8 = -joint7`。
 - 旧配置、action 或 MCAP 中的毫米值必须显式除以 `1000` 后再使用；本仓不会把 `40.0` 等旧值静默解释为 `40 mm`。
 
+## 真机生命周期
+
+- Follower 连接后固定移动到 `positions.initial` 并等待到位，关闭/断开前固定移动到 `positions.reset`；任一到位等待超时都会返回失败，不再提供跳过生命周期位姿的行为开关。
+- 新的真机采集 Workflow 应显式设置 `motion_speed_percent: 30`，首次验收使用受限硬件速度。
+- reset 位到位后发送 `DisablePiper()`，并轮询六个机械臂电机的 enable 状态；reset 或禁用确认失败仍会继续断开 CAN，但节点最终返回失败。现场仍需保留厂商急停与人工安全边界。
+- 生命周期字段只接受 `initial` 与 `reset`；旧 `positions.rest` 和 `move_to_rest_position()` 已删除，不提供兼容别名。
+
 ## 目录结构
 
 | 路径 | 说明 |

@@ -40,6 +40,58 @@ class GripperCodecTest(unittest.TestCase):
                 {"positions": {"initial": {"gripper": 40.0}}}
             )
 
+    def test_pre_1_1_positional_config_arguments_remain_compatible(self) -> None:
+        positions = {"initial": {"joint1": 0.25}}
+        config = AgilexPiperNodeConfig("can2", True, False, positions)
+
+        self.assertIs(config.positions, positions)
+        self.assertEqual(config.motion_speed_percent, 100)
+
+    def test_removed_lifecycle_behavior_switches_are_rejected(self) -> None:
+        for key, value in (
+            ("startup_behavior", "hold_current"),
+            ("shutdown_behavior", "disable"),
+        ):
+            with self.subTest(key=key), self.assertRaisesRegex(
+                ValueError, "已不再支持"
+            ):
+                AgilexPiperNodeConfig.from_dict({key: value})
+
+    def test_config_rejects_misspelled_lifecycle_keys(self) -> None:
+        for key in (
+            "motion_speed_percnt",
+            "startup_behaviour",
+            "stratup_behavior",
+            "shutdown_behaviour",
+        ):
+            expected = "未知配置项" if key == "motion_speed_percnt" else "已不再支持"
+            with self.subTest(key=key), self.assertRaisesRegex(ValueError, expected):
+                AgilexPiperNodeConfig.from_dict({key: "hold_current"})
+
+    def test_config_validates_motion_speed_percent(self) -> None:
+        config = AgilexPiperNodeConfig.from_dict({"motion_speed_percent": 30})
+        self.assertEqual(config.motion_speed_percent, 30)
+
+        for value in (0, 101, 30.5, True, "30"):
+            with self.subTest(value=value), self.assertRaisesRegex(
+                ValueError, "motion_speed_percent"
+            ):
+                AgilexPiperNodeConfig.from_dict({"motion_speed_percent": value})
+
+    def test_reset_position_is_canonical_and_rest_is_rejected(self) -> None:
+        reset = AgilexPiperNodeConfig.from_dict(
+            {"positions": {"reset": {"joint5": 0.25}}}
+        )
+        self.assertEqual(reset.resolved_position("reset")["joint5"], 0.25)
+
+        with self.assertRaisesRegex(ValueError, "未知 positions 名称: rest"):
+            AgilexPiperNodeConfig.from_dict(
+                {"positions": {"rest": {"joint5": 0.2}}}
+            )
+        with self.assertRaisesRegex(ValueError, "未知 positions 名称: rest"):
+            reset.resolved_position("rest")
+
+
     def test_observed_sdk_values_are_reported_even_outside_nominal_limits(self) -> None:
         self.assertEqual(gripper_sdk_to_meters(-1), -0.000001)
         self.assertEqual(

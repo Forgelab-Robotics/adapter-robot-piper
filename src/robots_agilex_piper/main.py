@@ -39,8 +39,9 @@ def _run_node(config_path: str | None) -> int:
         is_follower=config.is_follower,
         positions={
             "initial": config.resolved_position("initial"),
-            "rest": config.resolved_position("rest"),
+            "reset": config.resolved_position("reset"),
         },
+        motion_speed_percent=config.motion_speed_percent,
         auto_connect=True,
     )
     return run_dora_robot_node(

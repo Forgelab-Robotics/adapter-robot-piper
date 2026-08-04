@@ -13,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "agilex-piper"
-version = "1.0.0"
+version = "1.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "dora-rs" },
@@ -42,7 +42,7 @@ requires-dist = [
     { name = "forge-msgs", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&tag=forge-msgs-v1.0.0" },
     { name = "forge-robot", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&tag=forge-robot-v1.0.0" },
     { name = "mujoco", marker = "extra == 'test'", specifier = ">=3.3.0" },
-    { name = "piper-sdk", specifier = ">=0.6.1" },
+    { name = "piper-sdk", specifier = "==0.6.1" },
     { name = "pyinstaller", marker = "extra == 'pyinstaller'", specifier = ">=6.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
     { name = "python-can", specifier = ">=4.0" },

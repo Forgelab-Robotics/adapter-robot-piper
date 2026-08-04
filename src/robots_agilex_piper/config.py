@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from difflib import get_close_matches
 from pathlib import Path
 from typing import Any
 
@@ -65,9 +66,13 @@ AGILEX_PIPER_ACTUATOR_SPECS = (
 # 与 driver 中关节/夹爪顺序一致，固定不可配置
 AGILEX_PIPER_ACTUATOR_ORDER = [spec.name for spec in AGILEX_PIPER_ACTUATOR_SPECS]
 
+_SAFETY_CONFIG_KEYS = ("motion_speed_percent",)
+_REMOVED_BEHAVIOR_KEYS = ("startup_behavior", "shutdown_behavior")
+
+
 AGILEX_PIPER_DEFAULT_POSITIONS: dict[str, dict[str, float]] = {
     "initial": {name: 0.0 for name in AGILEX_PIPER_ACTUATOR_ORDER},
-    "rest": {
+    "reset": {
         "joint1": 0.0,
         "joint2": 0.0,
         "joint3": 0.0,
@@ -90,13 +95,15 @@ def _parse_positions(data: Any) -> dict[str, dict[str, float]] | None:
     parsed: dict[str, dict[str, float]] = {}
 
     for position_name, position in data.items():
-        name = str(position_name)
-        if name not in allowed_position_names:
+        raw_name = str(position_name)
+        if raw_name not in allowed_position_names:
             raise ValueError(
-                f"未知 positions 名称: {name}，可用值: {sorted(allowed_position_names)}"
+                f"未知 positions 名称: {raw_name}，可用值: "
+                f"{sorted(allowed_position_names)}"
             )
+        name = raw_name
         if not isinstance(position, dict):
-            raise ValueError(f"positions.{name} 必须是字典。")  # noqa: TRY004
+            raise ValueError(f"positions.{raw_name} 必须是字典。")  # noqa: TRY004
 
         parsed_position: dict[str, float] = {}
         for actuator_name, value in position.items():
@@ -123,19 +130,61 @@ class AgilexPiperNodeConfig:
     is_follower: bool
     debug: bool = False
     positions: dict[str, dict[str, float]] | None = None
+    motion_speed_percent: int = 100
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AgilexPiperNodeConfig:
         """从字典解析配置。"""
+        known_keys = {
+            "port",
+            "is_follower",
+            "debug",
+            "positions",
+            *_SAFETY_CONFIG_KEYS,
+        }
+        for key in set(data) - known_keys:
+            removed_matches = get_close_matches(
+                str(key),
+                _REMOVED_BEHAVIOR_KEYS,
+                n=1,
+                cutoff=0.6,
+            )
+            if removed_matches:
+                raise ValueError(
+                    f"配置项 {key!r} 已不再支持；Follower 生命周期固定为 "
+                    "连接回 initial、关闭/断开回 reset"
+                )
+            speed_matches = get_close_matches(
+                str(key),
+                _SAFETY_CONFIG_KEYS,
+                n=1,
+                cutoff=0.6,
+            )
+            if speed_matches:
+                raise ValueError(
+                    f"未知配置项 {key!r}，是否想写 {speed_matches[0]!r}？"
+                )
+
         port = data.get("port", "can0")
         is_follower = data.get("is_follower", True)
         debug = data.get("debug", False)
+        motion_speed_percent = data.get("motion_speed_percent", 100)
+        if (
+            isinstance(motion_speed_percent, bool)
+            or not isinstance(motion_speed_percent, int)
+            or not 1 <= motion_speed_percent <= 100
+        ):
+            raise ValueError(
+                "motion_speed_percent 必须是 1..100 的整数，"
+                f"当前为: {motion_speed_percent!r}"
+            )
         positions = _parse_positions(data.get("positions"))
         return cls(
             port=port,
             is_follower=is_follower,
             debug=debug,
             positions=positions,
+            motion_speed_percent=motion_speed_percent,
         )
 
     def resolved_position(self, name: str) -> dict[str, float]:

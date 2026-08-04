@@ -1,6 +1,6 @@
 [project]
 name = "agilex-piper"
-version = "1.0.0"
+version = "1.1.0"
 description = "Agilex Piper Robot configuration and teleop workflow"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -10,7 +10,7 @@ dependencies = [
 	"forge-common>=1.0.0,<2",
 	"forge-msgs>=1.0.0,<2",
 	"forge-robot>=1.0.0,<2",
-	"piper-sdk>=0.6.1",
+	"piper-sdk==0.6.1",
 	"pyyaml>=6.0",
 	"python-can>=4.0",
 ]
