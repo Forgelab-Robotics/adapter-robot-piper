@@ -29,7 +29,7 @@
 | `examples/02_dora_tests/` | Dora 节点与 Topic 集成测试 |
 | `examples/03_workflows/` | 端到端 Forge workflow（仿真 / 真机 / 同构 / VR） |
 | `src/` | Forge 规范机器人节点源码位置说明 |
-| `scripts/` | MJCF 校验、GLB 构建、历史资产导入工具 |
+| `scripts/` | 节点 PyInstaller 打包脚本 |
 | `config/` | 端口、相机、关节顺序、VR 标定等 |
 
 ## 资产状态
@@ -42,7 +42,6 @@ Agilex Piper 的 MJCF、mesh 与上游 GLB 已完成同步并落盘到本仓，�
 - `assets/glb/piper.glb`：Web / 可视化交付资产（pipeline 产物）
 - `assets/glb/piper_upstream/`：上游自带 GLB 保留追溯
 - `assets/urdf/piper_with_gripper.urdf`：`piper_description` 1.0.0 单臂 + 夹爪模型；mesh 已改为仓内相对路径，不包含桌子或其他场景资产
-- `scripts/import_piper_urdf.py`：校验上游 SHA-256 后重新导入基础 URDF，并生成单臂、双臂任务构型
 
 ## 仿真接入流程
 
@@ -50,7 +49,7 @@ Agilex Piper 的 MJCF、mesh 与上游 GLB 已完成同步并落盘到本仓，�
 
 **`examples/03_workflows/simulation/SIMULATION_INTEGRATION.md`**
 
-摘要：资产齐 → `verify_mjcf` → 对齐约定 → 运行本仓 **`examples/03_workflows/simulation/mujoco_piper/`**（`model_path` 指本仓 `scene.xml`，`prefix: item_1/`，7 个逻辑控制量与 `task_robot` 一致）→ 自动 sweep smoke test → 原生 MuJoCo GUI 手动检查 → 与真机对表。检查记录见 `examples/03_workflows/simulation/JOINT_SWEEP_CHECKLIST.md`。
+摘要：资产齐 → 对齐约定 → 运行本仓 **`examples/03_workflows/simulation/mujoco_piper/`**（`model_path` 指本仓 `scene.xml`，`prefix: item_1/`，7 个逻辑控制量与 `task_robot` 一致）→ 自动 sweep smoke test → 原生 MuJoCo GUI 手动检查 → 与真机对表。检查记录见 `examples/03_workflows/simulation/JOINT_SWEEP_CHECKLIST.md`。
 
 ## `src/` 与 Forge 节点
 

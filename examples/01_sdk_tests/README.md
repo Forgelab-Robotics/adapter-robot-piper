@@ -13,7 +13,7 @@
 示例：
 
 ```bash
-cd agilex_piper
+cd robots/agilex_piper
 uv run robots-agilex-piper list-devices --json
 uv run robots-agilex-piper check-role can0 can1 --json
 uv run robots-agilex-piper test can0 --duration 15

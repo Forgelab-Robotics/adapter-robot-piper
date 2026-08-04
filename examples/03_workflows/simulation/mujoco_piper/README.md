@@ -17,8 +17,4 @@ dora build dataflow.test_action_source.yaml --uv
 dora run dataflow.test_action_source.yaml --uv
 ```
 
-仓内 `test_action_source.py` 使用 actuator-specific 合法范围：六轴按各自方向扫描，夹爪仅扫描 `0..0.105 m`，不会依赖 MuJoCo 饱和掩盖单位错误。模型数值检查可从仓根运行：
-
-```bash
-python scripts/verify_mjcf.py --xml assets/mjcf/piper_mujoco/scene.xml
-```
+仓内 `test_action_source.py` 使用 actuator-specific 合法范围：六轴按各自方向扫描，夹爪仅扫描 `0..0.105 m`，不会依赖 MuJoCo 饱和掩盖单位错误。运行前请确认工作区目录布局见仓库根 `README.md`。

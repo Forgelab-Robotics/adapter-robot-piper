@@ -6,7 +6,7 @@
 
 nodes:
   - id: camera_hand
-    path: ../../../../../forge_runtime/target/release/forge-runtime-camera
+    path: ../../../../../../forge_runtime/target/release/forge-runtime-camera
     inputs:
       tick: dora/timer/millis/33     # ≈30Hz，相机采样频率
     outputs:
@@ -47,7 +47,7 @@ nodes:
       image/hand: task_robot/image/hand
 
   - id: task_robot
-    path: ../../../../../forge_runtime/packages/nodes/task_robot/main.py
+    path: ../../../../../../forge_runtime/packages/nodes/task_robot/main.py
     inputs:
       tick: dora/timer/millis/20
       robot_0/state: agilex_piper_slave/state

@@ -1,15 +1,17 @@
 # 脚本
 
-## 常规使用
+本目录仅保留节点打包相关脚本。
 
 | 脚本 | 作用 |
 |------|------|
-| `verify_mjcf.py` | 校验 MJCF 可加载、打印关节摘要，并检查总开口 gripper actuator 参数/限位/equality/中点映射 |
-| `build_glb_robot_asset_pipeline.sh` | 调用 `robot_asset_pipeline` 输出到 `assets/glb/`（`piper.glb`、`piper.xml`、`meshes/`；默认 `--skip-preview`） |
+| `build_pyinstaller.sh` | 在隔离构建环境中用 PyInstaller 打包 `robots_agilex_piper` 单文件可执行程序 |
+| `robots_agilex_piper.spec` | PyInstaller 规格文件，由 `build_pyinstaller.sh` 调用 |
 
-## 历史导入工具
+## 打包
 
-| 脚本 | 作用 |
-|------|------|
-| `sync_mjcf_from_robot_mj_model.sh` | 从 `robot-mj-model/models/PIPER` 导入到 `assets/mjcf/piper_mujoco/`（排除 `*.glb`）；同步后重新应用本仓总开口 gripper actuator 语义 |
-| `sync_glb_from_upstream.sh` | 从外部 Agilex Piper 资产源拷贝所有 `*.glb` 到 `assets/glb/piper_upstream/` |
+```bash
+cd robots/agilex_piper
+./scripts/build_pyinstaller.sh
+```
+
+产物默认在 `dist/robots_agilex_piper`。

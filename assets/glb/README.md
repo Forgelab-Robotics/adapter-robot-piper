@@ -13,8 +13,4 @@
 
 ## 重新生成
 
-```bash
-./scripts/build_glb_robot_asset_pipeline.sh
-```
-
-需要 **1080 预览图** 时去掉 `--skip-preview` 或设 `PIPER_SKIP_PREVIEW=0`（需安装 Blender）。重新生成后应对生成的 XML 再运行 `scripts/verify_mjcf.py`，避免流水线丢失总开口 actuator 属性。
+GLB 由内部 `robot_asset_pipeline` 从 `../mjcf/piper_mujoco/PIPER.xml` 导出；本开源包不附带重新生成脚本，交付以本目录已落盘文件为准。
