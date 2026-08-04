@@ -16,8 +16,8 @@
 仿真节点级验证命令：
 
 ```bash
-cd /home/donglinghan/chenruobing/robots/agilex_piper/examples/03_workflows/simulation/mujoco_piper
-source /home/donglinghan/chenruobing/forge_runtime/.venv/bin/activate
+cd robots/agilex_piper/examples/03_workflows/simulation/mujoco_piper
+# 先激活本机 forge_runtime / 项目虚拟环境，再执行：
 dora build dataflow.test_action_source.yaml --uv
 dora run dataflow.test_action_source.yaml --uv
 ```

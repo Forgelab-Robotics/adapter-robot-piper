@@ -14,7 +14,7 @@
 
 复制 `config.example.yaml` 为现场配置并修改。配置来源（优先级从高到低）：
 
-- `--config /path/to/config.yaml`
+- `--config config/agilex_piper_slave.yaml.example`
 - 环境变量 `AGILEX_PIPER_NODE_CONFIG`
 - dataflow 节点参数中的 `config` / `config_path`
 

@@ -23,7 +23,7 @@
 复现检查命令：
 
 ```bash
-cd /path/to/robots/agilex_piper
+cd robots/agilex_piper
 python scripts/verify_mjcf.py --xml assets/mjcf/piper_mujoco/scene.xml
 ```
 

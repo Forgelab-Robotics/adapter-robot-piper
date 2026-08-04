@@ -10,7 +10,7 @@
 - 本地源文件时间：2026-03-04
 - 随上游仓库提供的许可：MIT；完整文本见 `LICENSE.piper_ros-noetic`
 
-可运行 `scripts/import_piper_urdf.py /path/to/piper_description` 重新导入基础模型，并同步生成单臂、双臂任务构型 URDF。脚本会校验源 URDF 的 SHA-256，避免静默导入不同版本的 URDF；mesh 与许可文件仍取自同一上游工作树。
+可运行 `scripts/import_piper_urdf.py <piper_description目录>` 重新导入基础模型，并同步生成单臂、双臂任务构型 URDF。脚本会校验源 URDF 的 SHA-256，避免静默导入不同版本的 URDF；mesh 与许可文件仍取自同一上游工作树。
 
 ## 关节
 
