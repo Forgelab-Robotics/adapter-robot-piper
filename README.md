@@ -1,5 +1,7 @@
 # Agilex Piper（Forge 机器人交付包）
 
+[查看机器人构型说明](description.md)
+
 ## 交付内容
 
 | 内容 | 路径 |
