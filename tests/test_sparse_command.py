@@ -191,9 +191,57 @@ class SparseCommandTest(unittest.TestCase):
 
         self.assertEqual(state.position[-1], 0.04)
 
-    def test_legacy_millimeter_gripper_command_is_rejected(self) -> None:
-        with self.assertRaisesRegex(ValueError, "meters, not millimeters"):
-            self.driver.set_command(JointCommand(name=["gripper"], position=[40.0]))
+    def test_out_of_range_gripper_command_is_warned_and_clipped(self) -> None:
+        with patch("robots_agilex_piper.driver.logger.warning") as warning:
+            self.driver.set_command(
+                JointCommand(name=["gripper"], position=[40.0])
+            )
+
+        self.assertEqual(self.bus.motion_calls, [])
+        self.assertEqual(self.bus.joint_calls, [])
+        self.assertEqual(self.bus.gripper_calls, [(105_000, 1000, 0x01, 0)])
+        warning.assert_called_once_with(
+            "Position command for %s is outside [%s, %s] %s; clipping %s to %s.",
+            "gripper",
+            0.0,
+            0.105,
+            "meters",
+            40.0,
+            0.105,
+        )
+
+    def test_non_finite_position_is_rejected_without_hardware_writes(self) -> None:
+        cases = (
+            ("joint1", math.nan),
+            ("joint1", math.inf),
+            ("joint1", -math.inf),
+            ("gripper", math.nan),
+            ("gripper", math.inf),
+            ("gripper", -math.inf),
+        )
+        for name, value in cases:
+            with self.subTest(name=name, value=value):
+                driver = AgilexPiperDriver(auto_connect=False)
+                bus = _FakeBus()
+                driver.bus = bus  # type: ignore[assignment]
+
+                with self.assertRaisesRegex(ValueError, "must be finite"):
+                    driver.set_command(
+                        JointCommand(name=[name], position=[value])
+                    )
+
+                self.assertEqual(bus.motion_calls, [])
+                self.assertEqual(bus.joint_calls, [])
+                self.assertEqual(bus.gripper_calls, [])
+
+    def test_mixed_command_with_non_finite_gripper_is_atomic(self) -> None:
+        with self.assertRaisesRegex(ValueError, "gripper must be finite"):
+            self.driver.set_command(
+                JointCommand(
+                    name=[*_ARM_JOINT_NAMES, "gripper"],
+                    position=[0.1, 0.5, -0.5, 0.2, -0.2, 0.3, math.nan],
+                )
+            )
 
         self.assertEqual(self.bus.motion_calls, [])
         self.assertEqual(self.bus.joint_calls, [])
@@ -391,7 +439,7 @@ class ConnectionLifecycleTest(unittest.TestCase):
         self.assertEqual(actual_target["joint1"], 2.618)
         self.assertEqual(bus.joint_calls[0][0], _raw_angle(2.618))
 
-    def test_fixed_lifecycle_moves_initial_and_reset_then_disables(self) -> None:
+    def test_fixed_lifecycle_disconnects_without_disabling(self) -> None:
         bus = _SetupBus()
         driver = AgilexPiperDriver(auto_connect=False)
         driver._wait_for_position = Mock(return_value=True)  # type: ignore[method-assign]
@@ -405,7 +453,8 @@ class ConnectionLifecycleTest(unittest.TestCase):
 
         self.assertEqual(len(bus.joint_calls), 3)
         self.assertEqual(len(bus.gripper_calls), 3)
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
+        self.assertEqual(bus.setup_calls.count("disable"), 0)
+        self.assertEqual(bus.setup_calls[-1], "disconnect")
         waited_targets = [
             invocation.args[0] for invocation in driver._wait_for_position.call_args_list
         ]
@@ -508,7 +557,9 @@ class ConnectionLifecycleTest(unittest.TestCase):
         self.assertTrue(driver.is_follower)
         self.assertIsNone(driver.bus)
 
-    def test_reset_failure_still_disables_disconnects_and_is_reraised(self) -> None:
+    def test_reset_failure_still_disconnects_without_disabling_and_is_reraised(
+        self,
+    ) -> None:
         failure = RuntimeError("reset failed")
         bus = _SetupBus()
         driver = AgilexPiperDriver(auto_connect=False)
@@ -521,139 +572,115 @@ class ConnectionLifecycleTest(unittest.TestCase):
             driver.disconnect()
 
         self.assertIs(raised.exception, failure)
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
+        self.assertEqual(bus.setup_calls.count("disable"), 0)
+        self.assertEqual(bus.setup_calls[-1], "disconnect")
         self.assertIsNone(driver.bus)
 
-    def test_disable_failure_does_not_prevent_disconnect(self) -> None:
-        bus = _SetupBus(disable_failure=RuntimeError("disable failed"))
+    def test_disconnect_does_not_disable_follower(self) -> None:
+        bus = _SetupBus(disable_failure=RuntimeError("disable must not be called"))
         driver = AgilexPiperDriver(auto_connect=False)
         driver.bus = bus  # type: ignore[assignment]
         driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
 
-        with self.assertRaisesRegex(RuntimeError, "disable failed"):
-            driver.disconnect()
+        driver.disconnect()
 
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
+        driver.move_to_reset_position.assert_called_once_with()
+        self.assertEqual(bus.setup_calls.count("disable"), 0)
+        self.assertEqual(bus.setup_calls[-1], "disconnect")
         self.assertIsNone(driver.bus)
 
-    def test_missing_feedback_counter_fails_after_disable_and_still_disconnects(
-        self,
-    ) -> None:
+    def test_disable_helper_rejects_missing_feedback_counter(self) -> None:
         bus = _SetupBus()
         delattr(bus, "_C_PiperInterface_V2__fps_counter")
         driver = AgilexPiperDriver(auto_connect=False)
-        driver.bus = bus  # type: ignore[assignment]
-        driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
 
         with self.assertRaisesRegex(RuntimeError, "feedback counter is unavailable"):
-            driver.disconnect()
+            driver._disable_follower_and_wait(bus)
 
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
-        self.assertIsNone(driver.bus)
+        self.assertEqual(bus.setup_calls, ["disable"])
 
-    def test_disable_ignores_sdk_pre_command_result_and_polls_post_status(self) -> None:
+    def test_disable_helper_ignores_sdk_result_and_polls_post_status(self) -> None:
         bus = _SetupBus(
             disable_result=False,
             enable_statuses=[[True] * 6, [False] * 6],
         )
         driver = AgilexPiperDriver(auto_connect=False)
-        driver.bus = bus  # type: ignore[assignment]
-        driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
 
         with patch("robots_agilex_piper.driver.time.sleep"):
-            driver.disconnect()
+            driver._disable_follower_and_wait(bus)
 
         self.assertEqual(bus.enable_status_calls, 2)
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
-        self.assertIsNone(driver.bus)
+        self.assertEqual(bus.setup_calls, ["disable"])
 
-    def test_disable_status_timeout_is_failure_after_disconnect(self) -> None:
+    def test_disable_helper_times_out_while_motors_are_enabled(self) -> None:
         bus = _SetupBus(enable_statuses=[[True] * 6])
         driver = AgilexPiperDriver(auto_connect=False)
-        driver.bus = bus  # type: ignore[assignment]
-        driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
         driver._DISABLE_AGILEX_PIPER_TIMEOUT_SEC = 0.0
 
         with self.assertRaisesRegex(RuntimeError, "fresh disabled feedback"):
-            driver.disconnect()
+            driver._disable_follower_and_wait(bus)
 
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
-        self.assertIsNone(driver.bus)
+        self.assertEqual(bus.setup_calls, ["disable"])
 
-    def test_default_disabled_state_without_fresh_feedback_is_rejected(self) -> None:
+    def test_disable_helper_rejects_default_state_without_fresh_feedback(
+        self,
+    ) -> None:
         bus = _SetupBus(refresh_enable_feedback_on_poll=False)
         driver = AgilexPiperDriver(auto_connect=False)
-        driver.bus = bus  # type: ignore[assignment]
-        driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
         driver._DISABLE_AGILEX_PIPER_TIMEOUT_SEC = 0.0
 
         with self.assertRaisesRegex(RuntimeError, "fresh disabled feedback"):
-            driver.disconnect()
+            driver._disable_follower_and_wait(bus)
 
         self.assertEqual(bus.enable_status_calls, 1)
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
-        self.assertIsNone(driver.bus)
+        self.assertEqual(bus.setup_calls, ["disable"])
 
-    def test_feedback_received_during_disable_is_not_accepted(self) -> None:
+    def test_disable_helper_rejects_feedback_received_during_command(self) -> None:
         bus = _SetupBus(
             refresh_enable_feedback_on_poll=False,
             refresh_enable_feedback_during_disable=True,
         )
         driver = AgilexPiperDriver(auto_connect=False)
-        driver.bus = bus  # type: ignore[assignment]
-        driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
         driver._DISABLE_AGILEX_PIPER_TIMEOUT_SEC = 0.0
 
         with self.assertRaisesRegex(RuntimeError, "fresh disabled feedback"):
-            driver.disconnect()
+            driver._disable_follower_and_wait(bus)
 
         self.assertEqual(bus.enable_status_calls, 1)
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
-        self.assertIsNone(driver.bus)
+        self.assertEqual(bus.setup_calls, ["disable"])
 
-    def test_partial_motor_feedback_is_rejected(self) -> None:
+    def test_disable_helper_rejects_partial_motor_feedback(self) -> None:
         bus = _SetupBus(refreshed_enable_streams=_ENABLE_FEEDBACK_STREAMS[:-1])
         driver = AgilexPiperDriver(auto_connect=False)
-        driver.bus = bus  # type: ignore[assignment]
-        driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
         driver._DISABLE_AGILEX_PIPER_TIMEOUT_SEC = 0.0
 
         with self.assertRaisesRegex(RuntimeError, "fresh disabled feedback"):
-            driver.disconnect()
+            driver._disable_follower_and_wait(bus)
 
         self.assertEqual(bus.enable_status_calls, 1)
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
-        self.assertIsNone(driver.bus)
+        self.assertEqual(bus.setup_calls, ["disable"])
 
-    def test_invalid_motor_feedback_ids_are_rejected(self) -> None:
+    def test_disable_helper_rejects_invalid_motor_feedback_ids(self) -> None:
         bus = _SetupBus(enable_can_ids=(0, 0, 0, 0, 0, 0))
         driver = AgilexPiperDriver(auto_connect=False)
-        driver.bus = bus  # type: ignore[assignment]
-        driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
         driver._DISABLE_AGILEX_PIPER_TIMEOUT_SEC = 0.0
 
         with self.assertRaisesRegex(RuntimeError, "fresh disabled feedback"):
-            driver.disconnect()
+            driver._disable_follower_and_wait(bus)
 
         self.assertEqual(bus.enable_status_calls, 1)
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
-        self.assertIsNone(driver.bus)
+        self.assertEqual(bus.setup_calls, ["disable"])
 
-    def test_base_exception_during_disable_still_disconnects_and_is_reraised(
-        self,
-    ) -> None:
+    def test_disable_helper_propagates_base_exception(self) -> None:
         interruption = KeyboardInterrupt()
         bus = _SetupBus(disable_failure=interruption)
         driver = AgilexPiperDriver(auto_connect=False)
-        driver.bus = bus  # type: ignore[assignment]
-        driver.move_to_reset_position = Mock()  # type: ignore[method-assign]
 
         with self.assertRaises(KeyboardInterrupt) as raised:
-            driver.disconnect()
+            driver._disable_follower_and_wait(bus)
 
         self.assertIs(raised.exception, interruption)
-        self.assertEqual(bus.setup_calls[-2:], ["disable", "disconnect"])
-        self.assertIsNone(driver.bus)
+        self.assertEqual(bus.setup_calls, ["disable"])
 
     def test_failed_connect_rolls_back_each_setup_stage_without_reset(self) -> None:
         cases = (

@@ -42,11 +42,37 @@ _ENABLE_FEEDBACK_STREAMS = tuple(
 _ENABLE_FEEDBACK_CAN_IDS = tuple(range(0x261, 0x267))
 
 
-def _validate_requested_gripper_position(command: JointCommand) -> None:
-    if "gripper" not in command.name or not command.position:
-        return
-    positions = dict(zip(command.name, command.position, strict=True))
-    gripper_meters_to_sdk(positions["gripper"])
+def _clip_position_command(command: JointCommand) -> JointCommand:
+    if len(command.name) != len(command.position):
+        raise ValueError("JointCommand name and position lengths must match")
+    for name, position in zip(command.name, command.position, strict=True):
+        if not math.isfinite(position):
+            raise ValueError(
+                f"Position command for {name} must be finite, got {position!r}"
+            )
+
+    safe_command = clip_and_validate_position_command(command, _ACTUATOR_SPECS_DICT)
+    requested_positions = dict(zip(command.name, command.position, strict=False))
+    safe_positions = dict(
+        zip(safe_command.name, safe_command.position, strict=False)
+    )
+
+    for name, safe_position in safe_positions.items():
+        requested_position = requested_positions.get(name)
+        if requested_position == safe_position:
+            continue
+        spec = _ACTUATOR_SPECS_DICT[name]
+        logger.warning(
+            "Position command for %s is outside [%s, %s] %s; clipping %s to %s.",
+            name,
+            spec.min_position,
+            spec.max_position,
+            spec.position_unit,
+            requested_position,
+            safe_position,
+        )
+
+    return safe_command
 
 
 class AgilexPiperDriver(BaseRobotDriver):
@@ -387,23 +413,13 @@ class AgilexPiperDriver(BaseRobotDriver):
         pending_error: BaseException | None = None
 
         if self.is_follower:
-            logger.info("Safety sequence: Moving to reset position before disable...")
+            logger.info("Safety sequence: Moving to reset position before disconnect...")
             try:
                 self.move_to_reset_position()
             except BaseException as error:  # Cleanup continues, then failure is raised.
                 pending_error = error
 
-        if self.is_follower:
-            logger.info("Disabling follower before disconnect...")
-            try:
-                self._disable_follower_and_wait(bus)
-            except BaseException as error:  # Cleanup continues, then failure is raised.
-                if pending_error is None:
-                    pending_error = error
-                else:
-                    logger.error("Follower disable failed during cleanup: %s", error)
-
-        logger.info("Disconnecting from the robot...")
+        logger.info("Disconnecting from the robot without disabling it...")
         try:
             bus.DisconnectPort()
         except BaseException as error:
@@ -518,8 +534,7 @@ class AgilexPiperDriver(BaseRobotDriver):
 
         if getattr(command, "mode", "position") != "position":
             raise ValueError("Agilex Piper requires JointCommand mode='position'")
-        _validate_requested_gripper_position(command)
-        safe_command = clip_and_validate_position_command(command, _ACTUATOR_SPECS_DICT)
+        safe_command = _clip_position_command(command)
         if not safe_command.position:
             raise ValueError("Agilex Piper requires a position JointCommand")
         action_dict = dict(zip(safe_command.name, safe_command.position, strict=True))
@@ -527,6 +542,8 @@ class AgilexPiperDriver(BaseRobotDriver):
         arm_updates = {
             name: action_dict[name] for name in _ARM_JOINT_NAMES if name in action_dict
         }
+        arm_targets: dict[str, float] | None = None
+        joint_values: list[int] | None = None
         if arm_updates:
             if len(arm_updates) == len(_ARM_JOINT_NAMES):
                 arm_targets = dict(arm_updates)
@@ -544,6 +561,14 @@ class AgilexPiperDriver(BaseRobotDriver):
                 int(math.degrees(arm_targets[name]) * self.ANGLE_SCALE)
                 for name in _ARM_JOINT_NAMES
             ]
+
+        gripper = (
+            gripper_meters_to_sdk(action_dict["gripper"])
+            if "gripper" in action_dict
+            else None
+        )
+
+        if joint_values is not None and arm_targets is not None:
             self.bus.MotionCtrl_2(
                 0x01,
                 0x01,
@@ -553,6 +578,5 @@ class AgilexPiperDriver(BaseRobotDriver):
             self.bus.JointCtrl(*joint_values)
             self._arm_target_cache = arm_targets
 
-        if "gripper" in action_dict:
-            gripper = gripper_meters_to_sdk(action_dict["gripper"])
+        if gripper is not None:
             self.bus.GripperCtrl(gripper, 1000, 0x01, 0)
