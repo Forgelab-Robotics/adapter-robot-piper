@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 
+from piper_sdk.piper_param import C_PiperParamManager
 from robots_agilex_piper.codec import (
     GRIPPER_MAX_OPENING_METERS,
     GRIPPER_MAX_SDK,
@@ -98,6 +99,17 @@ class GripperCodecTest(unittest.TestCase):
             gripper_sdk_to_meters(GRIPPER_MAX_SDK + 1),
             0.105001,
         )
+
+    def test_arm_limits_match_piper_sdk_defaults(self) -> None:
+        sdk_limits = C_PiperParamManager().GetPiperParamOrigin()["joint_limit"]
+        arm_specs = AGILEX_PIPER_ACTUATOR_SPECS[:6]
+
+        for index, spec in enumerate(arm_specs, start=1):
+            with self.subTest(joint=spec.name):
+                self.assertEqual(
+                    (spec.min_position, spec.max_position),
+                    tuple(sdk_limits[f"j{index}"]),
+                )
 
     def test_forge_actuator_spec_uses_total_opening_meters(self) -> None:
         gripper_spec = next(

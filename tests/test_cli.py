@@ -13,7 +13,7 @@ class CliTest(unittest.TestCase):
             result = CliRunner().invoke(app, ["--version"])
 
         self.assertEqual(result.exit_code, 0)
-        self.assertEqual(result.output, "agilex-piper 1.1.2\n")
+        self.assertEqual(result.output, "agilex-piper 1.1.3\n")
         run_node.assert_not_called()
 
 

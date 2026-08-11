@@ -13,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "agilex-piper"
-version = "1.1.2"
+version = "1.1.3"
 source = { editable = "." }
 dependencies = [
     { name = "dora-rs" },
@@ -42,7 +42,7 @@ requires-dist = [
     { name = "forge-msgs", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Fmsgs&tag=forge-msgs-v1.0.0" },
     { name = "forge-robot", git = "https://gitlab.ex-ai.cn/meta-emt/framework/forge.git?subdirectory=packages%2Frobot&tag=forge-robot-v1.0.0" },
     { name = "mujoco", marker = "extra == 'test'", specifier = ">=3.3.0" },
-    { name = "piper-sdk", specifier = "==0.6.1" },
+    { name = "piper-sdk", specifier = "==0.6.2" },
     { name = "pyinstaller", marker = "extra == 'pyinstaller'", specifier = ">=6.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
     { name = "python-can", specifier = ">=4.0" },
@@ -410,14 +410,14 @@ wheels = [
 
 [[package]]
 name = "piper-sdk"
-version = "0.6.1"
+version = "0.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "python-can" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b5/c4/06172af8276170ff0f484e2065f853eef53d7ced3cc822730f55ea110f3b/piper_sdk-0.6.1.tar.gz", hash = "sha256:2a154870992379f5048caf70662fdbb29f11b7cb17846d6a23afc07cd3d57217", size = 161302, upload-time = "2025-10-30T06:38:53.054Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/de/47/d35bcfd06ef2f81c25d9c3e7e2a4853637c998c3e1bea4addd6de5718e56/piper_sdk-0.6.2.tar.gz", hash = "sha256:d9e0684c52230b078110e04f3bfefdc4b918422537878b60bbee10420b159c9d", size = 162173, upload-time = "2026-07-31T09:27:37.116Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/0c/4473a7a9aca9c50798abec6a77e8e5e714ad968399db3d2b86162a05177c/piper_sdk-0.6.1-py3-none-any.whl", hash = "sha256:743557e1b8dfe685f2c33d728ab28c3ff510de8860d6494e54ed5d801493d65c", size = 193748, upload-time = "2025-10-30T06:38:51.368Z" },
+    { url = "https://files.pythonhosted.org/packages/10/2f/5c96034de9816d7da431b4c007efff2c8d4afd3182d4541ac3c64493080c/piper_sdk-0.6.2-py3-none-any.whl", hash = "sha256:d4aa1088fd6716f2f8c81a269dc5fb88b4c875a859e1c06e95bf2e9e8a6493c6", size = 194143, upload-time = "2026-07-31T09:27:35.482Z" },
 ]
 
 [[package]]

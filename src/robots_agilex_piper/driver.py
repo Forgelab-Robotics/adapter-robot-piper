@@ -188,7 +188,7 @@ class AgilexPiperDriver(BaseRobotDriver):
         bus: C_PiperInterface_V2,
         stream_names: tuple[str, ...],
     ) -> tuple[int, ...]:
-        """Snapshot per-CAN-stream frame counters from locked piper-sdk 0.6.1."""
+        """Snapshot per-CAN-stream frame counters from locked piper-sdk 0.6.2."""
         counter = getattr(bus, "_C_PiperInterface_V2__fps_counter", None)
         if counter is None:
             raise RuntimeError(
@@ -436,7 +436,7 @@ class AgilexPiperDriver(BaseRobotDriver):
         logger.info("Disconnected from the robot.")
 
     def _disable_follower_and_wait(self, bus: C_PiperInterface_V2) -> None:
-        # piper-sdk 0.6.1 returns the pre-command state from DisablePiper and
+        # piper-sdk 0.6.2 returns the pre-command state from DisablePiper and
         # initializes missing low-speed feedback as disabled. Require one fresh
         # frame from every motor stream after the command before accepting it.
         bus.DisablePiper()

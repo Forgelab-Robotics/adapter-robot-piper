@@ -17,12 +17,13 @@ from robots_agilex_piper.codec import (
     validate_gripper_opening_meters,
 )
 
+# Keep the six arm limits aligned with piper-sdk's C_PiperParamManager defaults.
 AGILEX_PIPER_ACTUATOR_SPECS = (
     ActuatorSpec(
         name="joint1",
         kind="revolute",
-        min_position=-2.618,
-        max_position=2.618,
+        min_position=-2.6179,
+        max_position=2.6179,
     ),
     ActuatorSpec(
         name="joint2",
@@ -45,14 +46,14 @@ AGILEX_PIPER_ACTUATOR_SPECS = (
     ActuatorSpec(
         name="joint5",
         kind="revolute",
-        min_position=-1.320,
-        max_position=1.320,
+        min_position=-1.22,
+        max_position=1.22,
     ),
     ActuatorSpec(
         name="joint6",
         kind="revolute",
-        min_position=-2.094,
-        max_position=2.094,
+        min_position=-2.09439,
+        max_position=2.09439,
     ),
     ActuatorSpec(
         name="gripper",

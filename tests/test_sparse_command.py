@@ -7,7 +7,6 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from forge_msgs import JointCommand, JointState
-
 from robots_agilex_piper.driver import (
     _ARM_JOINT_NAMES,
     _ENABLE_FEEDBACK_CAN_IDS,
@@ -398,14 +397,14 @@ class ConnectionLifecycleTest(unittest.TestCase):
         ):
             driver.connect()
 
-        expected_joint1 = _raw_angle(2.618)
+        expected_joint1 = _raw_angle(2.6179)
         self.assertEqual([frame[0] for frame in bus.joint_calls], [expected_joint1] * 2)
         arm_target_cache = driver._arm_target_cache
         self.assertIsNotNone(arm_target_cache)
         assert arm_target_cache is not None
-        self.assertEqual(arm_target_cache["joint1"], 2.618)
+        self.assertEqual(arm_target_cache["joint1"], 2.6179)
         initial_target = driver._wait_for_position.call_args.args[0]
-        self.assertEqual(initial_target["joint1"], 2.618)
+        self.assertEqual(initial_target["joint1"], 2.6179)
         self.assertIs(driver.bus, bus)
 
     def test_initial_feedback_baseline_is_sampled_after_command(self) -> None:
@@ -436,8 +435,8 @@ class ConnectionLifecycleTest(unittest.TestCase):
         driver.move_to_reset_position()
 
         actual_target = driver._wait_for_position.call_args.args[0]
-        self.assertEqual(actual_target["joint1"], 2.618)
-        self.assertEqual(bus.joint_calls[0][0], _raw_angle(2.618))
+        self.assertEqual(actual_target["joint1"], 2.6179)
+        self.assertEqual(bus.joint_calls[0][0], _raw_angle(2.6179))
 
     def test_fixed_lifecycle_disconnects_without_disabling(self) -> None:
         bus = _SetupBus()

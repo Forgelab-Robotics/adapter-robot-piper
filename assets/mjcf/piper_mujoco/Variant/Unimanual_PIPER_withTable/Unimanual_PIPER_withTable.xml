@@ -151,7 +151,7 @@
                 <body name="link1" pos="0 0 0.123" quat="0.707105 0 0 -0.707108" gravcomp="1">
                     <inertial pos="0.00131676 0.000310289 -0.00922875" quat="0.557105 0.432155 0.377373 0.600388" mass="0.097868"
                     diaginertia="9.25942e-05 8.3083e-05 7.69469e-05"/>
-                    <joint name="joint1" axis="0 0 1" range="-2.618 2.618"/>
+                    <joint name="joint1" axis="0 0 1" range="-2.6179 2.6179"/>
                     <geom class="visual" density="0" mesh="link1" material="gray_mat"/>
                     <geom class="collision" mesh="link1"/>
                     <body name="link2" quat="0.499998 0.5 -0.500002 -0.5" gravcomp="1">
@@ -237,7 +237,7 @@
                         <body name="link5" quat="0.707105 0.707108 0 0" gravcomp="1">
                             <inertial pos="8.82262e-05 0.0566829 -0.0019612" quat="0.507447 0.490986 0.506887 0.494466"
                             mass="0.144711" diaginertia="0.001 0.001 0.001"/>
-                            <joint name="joint5" axis="0 0 1" range="-1.32 1.32"/>
+                            <joint name="joint5" axis="0 0 1" range="-1.22 1.22"/>
                             <geom mesh="link5_2" material="black_mat" class="visual"/>
                             <geom mesh="link5_3" material="black_mat" class="visual"/>
                             <geom mesh="link5_4" material="darker_gray_mat" class="visual"/>
@@ -249,7 +249,7 @@
                             <body name="link6" pos="0 0.091 0.0014165" quat="0 0 -0.707105 -0.707108" gravcomp="1">
                             <inertial pos="0.0010312 0.0121761 0.0315481" quat="0.0230402 0.707091 0.0373344 0.70576" mass="1.2"
                                 diaginertia="0.001 0.001 0.001"/>
-                            <joint name="joint6" axis="0 0 1" range="-2.094 2.094"/>
+                            <joint name="joint6" axis="0 0 1" range="-2.09439 2.09439"/>
                             <geom quat="0.707105 0 0 0.707108" mesh="link6" material="gray_mat" class="visual"/>
                             <geom quat="0.707105 0 0 0.707108" mesh="link6" class="collision"/>
                             <body name="link7" pos="0 0 0.13503" quat="1.89468e-08 1.89469e-08 0.707108 0.707105" gravcomp="1">
