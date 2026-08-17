@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
 """Agilex Piper 统一入口：dora 节点（run）与设备工具。"""
 
 from __future__ import annotations

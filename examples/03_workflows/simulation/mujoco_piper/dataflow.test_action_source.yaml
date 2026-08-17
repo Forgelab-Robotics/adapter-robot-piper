@@ -1,10 +1,10 @@
 #! test_action_source 驱动 task_robot + mujoco（Agilex Piper）
-#! 前置：工作区根下并列存在 forge_runtime 与本仓库（内含 robots/agilex_piper）
+#! 前置：设置 FORGE_RUNTIME_ROOT 与 FORGE_RUNTIME_BIN 环境变量
 #! 运行: dora build dataflow.test_action_source.yaml --uv && dora run dataflow.test_action_source.yaml --uv
 
 nodes:
   - id: mujoco
-    path: ../../../../../../../forge_runtime/packages/nodes/simulators/mujoco/main.py
+    path: ${FORGE_RUNTIME_ROOT}/packages/nodes/simulators/mujoco/main.py
     inputs:
       tick: dora/timer/millis/20
       action: task_robot/action
@@ -17,7 +17,7 @@ nodes:
     args: --config simulator.yaml
 
   - id: task_robot
-    path: ../../../../../../../forge_runtime/packages/nodes/task_robot/main.py
+    path: ${FORGE_RUNTIME_ROOT}/packages/nodes/task_robot/main.py
     inputs:
       tick: dora/timer/millis/20
       action: test_action_source/action
@@ -54,7 +54,7 @@ nodes:
       image/left_pillar: task_robot/image/left_pillar
 
   - id: stream_viewer
-    path: ../../../../../../../forge_runtime/packages/nodes/viewers/stream_viewer/main.py
+    path: ${FORGE_RUNTIME_ROOT}/packages/nodes/viewers/stream_viewer/main.py
     inputs:
       tick: dora/timer/millis/40
       proprio_state: task_robot/proprio_state

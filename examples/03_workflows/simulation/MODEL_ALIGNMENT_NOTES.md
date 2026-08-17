@@ -12,4 +12,4 @@
 
 ## 记录
 
-- 2026-05-12：基于既有 `forge_runtime` Agilex Piper 示例和本仓 MJCF 资产建立 Agilex Piper 仿真资产与 workflow 配置；仿真 SSOT 以 `assets/mjcf/piper_mujoco/scene.xml` 为准。真机方向、零位、限位待后续实机资料复核。记录人：陈若冰。
+- 2026-05-12：基于既有 Forge runtime Agilex Piper 示例和本仓 MJCF 资产建立 Agilex Piper 仿真资产与 workflow 配置；仿真 SSOT 以 `assets/mjcf/piper_mujoco/scene.xml` 为准。真机方向、零位、限位待后续实机资料复核。验收记录。

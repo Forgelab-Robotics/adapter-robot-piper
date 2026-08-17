@@ -1,5 +1,5 @@
 # 仿真 + 推理 + 录制 示例
-# 运行：在 examples/sim_inference_record 目录下
+# 运行：在 examples/03_workflows/sim_teleop 目录下
 #   dora build dataflow.yaml --uv && dora run dataflow.yaml --uv
 #
 # 数据流：agilex_piper_master(state) 驱动 mujoco；task_robot 将 master_state 转为 action 供 mcap_recorder 录制。
@@ -7,7 +7,7 @@
 
 nodes:
   - id: mujoco
-    path: ../../../bin/mujoco_sim
+    path: ${FORGE_RUNTIME_BIN}/mujoco_sim
     inputs:
       tick: dora/timer/millis/20
       robot_0/master_state: agilex_piper_master/state
@@ -20,7 +20,7 @@ nodes:
     args: --config simulator.yaml
 
   - id: image_viewer
-    path: ../../../bin/image_viewer
+    path: ${FORGE_RUNTIME_BIN}/image_viewer
     inputs:
       image/hand: mujoco/image/hand
       image/top: mujoco/image/top

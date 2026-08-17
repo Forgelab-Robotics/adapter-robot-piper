@@ -1,6 +1,6 @@
 # Agilex Piper 真机录制 workflow
 
-本 workflow 已从 `forge_runtime/examples/real_record/` 迁入本仓，并将 Agilex Piper 节点路径改为本仓源码：
+本 workflow 使用本仓 Agilex Piper 节点源码：
 
 `../../../src/robots_agilex_piper/main.py`
 
@@ -18,13 +18,17 @@
 1. 真机 Agilex Piper 已上电、急停释放、CAN 设备可用。
 2. `agilex_piper_master.yaml` / `agilex_piper_slave.yaml` 的 `port` 已按现场修改。
 3. 摄像头设备与 `camera.yaml` 一致。
-4. `dataflow.yaml` 中的 `camera_hand` 依赖 `forge_runtime/target/release/forge-runtime-camera`。当前开发机未检测到该 release 产物；真机录制前需先在 `forge_runtime` 构建 camera 节点，或按现场 camera 节点实现替换该路径。
+4. 设置 `FORGE_RUNTIME_ROOT` 和 `FORGE_RUNTIME_BIN`。`camera_hand` 依赖
+   `$FORGE_RUNTIME_ROOT/target/release/forge-runtime-camera`；真机录制前需
+   构建 camera 节点，或按现场实现替换该路径。
 5. 新录制的 `gripper` 字段为两指总开口米值 `0..0.105`；不要与旧毫米制数据混用。
 
 ## 运行
 
 ```bash
-cd robots/agilex_piper/examples/03_workflows/real_record
+cd examples/03_workflows/real_record
+export FORGE_RUNTIME_ROOT=/absolute/path/to/forge-runtime
+export FORGE_RUNTIME_BIN="$FORGE_RUNTIME_ROOT/bin"
 dora build dataflow.yaml --uv
 dora run dataflow.yaml --uv
 ```

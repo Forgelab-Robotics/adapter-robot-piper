@@ -1,17 +1,71 @@
-# Agilex Piper（Forge 机器人交付包）
+# Agilex Piper Robot Adapter
 
-[查看机器人构型说明](description.md)
+[查看机器人构型说明](description.md) ·
+[开源审计记录](OPEN_SOURCE_AUDIT.md)
+
+> [!WARNING]
+> 本项目可以向真实机械臂发送运动指令，但不是经过功能安全认证的控制系统。
+> 首次连接真机前必须阅读 [SAFETY.md](SAFETY.md)，验证厂商急停、隔离工作区，
+> 并使用低速、小幅、单关节动作。使用者自行承担人身和设备风险。
 
 ## 交付内容
 
 | 内容 | 路径 |
 |------|------|
 | **MJCF + meshes** | `assets/mjcf/piper_mujoco/`，仿真入口为 `scene.xml`，主模型为 `PIPER.xml` |
-| **GLB / 可视化资产** | `assets/glb/piper.glb`，由 `robot_asset_pipeline` 生成；上游 GLB 另保留追溯 |
+| **GLB / 可视化资产** | `assets/glb/piper.glb`，由本仓 MJCF 转换；上游 GLB 另保留追溯 |
 | **仿真配置示例** | `examples/03_workflows/simulation/mujoco_piper/` |
-| **真机节点源码** | `src/robots_agilex_piper/`，由 `forge_robots/packages/piper/` 迁入 |
+| **真机节点源码** | `src/robots_agilex_piper/`，实现 Forge robot driver 与 Dora 节点入口 |
 
-本仓以 `robot-mj-model/models/PIPER` 与既有 `forge_runtime` Agilex Piper 示例为资产和 workflow 来源，已在 `examples/03_workflows/simulation/mujoco_piper/` 提供本仓可运行配置，其 `simulator.yaml` 的 `model_path` 指向本仓 `assets/mjcf/piper_mujoco/scene.xml`。
+机器人模型来源与第三方许可见
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。仿真配置位于
+`examples/03_workflows/simulation/mujoco_piper/`，其 `simulator.yaml`
+直接引用本仓 `assets/mjcf/piper_mujoco/scene.xml`。
+
+## 安装与测试
+
+需要 Python 3.12 或更高版本及
+[`uv`](https://docs.astral.sh/uv/)。核心 Forge 包与其他 Python 依赖均从
+PyPI 安装，`--frozen` 确保实际环境与 `uv.lock` 一致：
+
+```bash
+uv sync --frozen --extra test
+uv run python -m unittest discover -s tests -v
+uv run robots-agilex-piper --version
+```
+
+真机运行还需要 Linux、可用的 SocketCAN 接口及 AgileX Piper 硬件。Dora
+workflow 中的通用仿真、TaskRobot、录制和查看节点由外部 Forge runtime 提供。
+运行相关 dataflow 前设置：
+
+```bash
+export FORGE_RUNTIME_ROOT=/absolute/path/to/forge-runtime
+export FORGE_RUNTIME_BIN="$FORGE_RUNTIME_ROOT/bin"
+```
+
+仅执行 SDK、配置解析和资产检查时不需要连接真机。CI 不运行任何真机动作。
+
+## 配置
+
+真机 follower 的权威示例为
+`config/agilex_piper_slave.yaml.example`：
+
+```bash
+cp config/agilex_piper_slave.yaml.example config/agilex_piper_node.yaml
+uv run robots-agilex-piper run --config config/agilex_piper_node.yaml
+```
+
+也可设置 `AGILEX_PIPER_NODE_CONFIG`。显式 `--config` 优先；Dora dataflow
+应通过 `args: --config <path>` 传入。主要字段：
+
+- `port`：SocketCAN 设备名，例如 `can0`。
+- `is_follower`：`true` 驱动从臂，`false` 只读主臂。
+- `motion_speed_percent`：硬件速度百分比 `1..100`，首次测试建议 `30` 或更低。
+- `positions.initial` / `positions.reset`：连接和断开时使用的生命周期位姿。
+- `debug`：是否启用调试日志。
+
+配置仅在启动时读取，修改后需重启节点，不支持运行时热更新。完整说明见
+[`config/README.md`](config/README.md)。
 
 ## 夹爪单位契约
 
@@ -48,11 +102,11 @@ SDK 还提供 `GetAllMotorAngleLimitMaxSpd()`，可从已连接真机读取固�
 | 路径 | 说明 |
 |------|------|
 | `assets/mjcf/` | MJCF、mesh、`scene.xml` |
-| `assets/glb/` | Web / 可视化 GLB（pipeline 产物 + 上游 GLB 追溯） |
+| `assets/glb/` | Web / 可视化 GLB（转换产物 + 上游 GLB 追溯） |
 | `assets/urdf/` | 官方 Piper 单臂 + 夹爪 URDF、mesh 与上游许可 |
 | `examples/01_sdk_tests/` | 直连厂商 SDK 的最小测试（与 Forge 解耦） |
 | `examples/02_dora_tests/` | Dora 节点与 Topic 集成测试 |
-| `examples/03_workflows/` | 端到端 Forge workflow（仿真 / 真机 / 同构 / VR） |
+| `examples/03_workflows/` | Forge 集成模板与已验证 workflow（仿真 / 真机） |
 | `src/` | Forge 规范机器人节点源码位置说明 |
 | `scripts/` | 节点 PyInstaller 打包脚本 |
 | `config/` | 端口、相机、关节顺序、VR 标定等 |
@@ -61,16 +115,16 @@ SDK 还提供 `GetAllMotorAngleLimitMaxSpd()`，可从已连接真机读取固�
 
 Agilex Piper 的 MJCF、mesh 与上游 GLB 已完成同步并落盘到本仓，后续仿真与交付以本仓 `assets/` 下内容为准：
 
-- `assets/mjcf/piper_mujoco/scene.xml`：MuJoCo 仿真入口，`attach` 前缀为 `item_1/`
+- `assets/mjcf/piper_mujoco/scene.xml`：MuJoCo 仿真入口，`attach` 前缀为
+  `item_1/`；补充 `left_pillar`、`top`、`angle` 三个固定场景相机
 - `assets/mjcf/piper_mujoco/PIPER.xml`：Agilex Piper 单臂 + 夹爪主体，含腕部相机 `wrist_cam`
-- `assets/mjcf/piper_mujoco/scene.xml`：在上游场景基础上补充 `left_pillar`、`top`、`angle` 三个固定场景相机，用于兼容既有 Forge image topic
-- `assets/glb/piper.glb`：Web / 可视化交付资产（pipeline 产物）
+- `assets/glb/piper.glb`：Web / 可视化交付资产（由本仓 MJCF 转换）
 - `assets/glb/piper_upstream/`：上游自带 GLB 保留追溯
 - `assets/urdf/piper_with_gripper.urdf`：`piper_description` 1.0.0 单臂 + 夹爪模型；mesh 已改为仓内相对路径，不包含桌子或其他场景资产
 
 ## 仿真接入流程
 
-分步说明、与 `forge_runtime` 对接要点及复现命令见：
+分步说明、与 Forge runtime 对接要点及复现命令见：
 
 **`examples/03_workflows/simulation/SIMULATION_INTEGRATION.md`**
 
@@ -78,4 +132,38 @@ Agilex Piper 的 MJCF、mesh 与上游 GLB 已完成同步并落盘到本仓，�
 
 ## `src/` 与 Forge 节点
 
-当前 Agilex Piper 真机 / Dora 节点实现已从 `forge_robots/packages/piper/` 迁入本仓 `src/robots_agilex_piper/`（包名 `robots_agilex_piper`）。本仓 workflow 中的 Agilex Piper 节点均指向该本地源码；后续若上游实现更新，应同步迁入并记录来源 commit。
+Agilex Piper 真机 / Dora 节点实现位于
+`src/robots_agilex_piper/`（包名 `robots_agilex_piper`）。本仓 workflow
+中的 Agilex Piper 节点均指向该本地源码。
+
+## 验证与交付文档
+
+- 无硬件测试：`uv run python -m unittest discover -s tests -v`
+- 锁文件安装与构建：`uv sync --frozen --extra test && uv build`
+- 发版流程：[RELEASING.md](RELEASING.md)
+- 开源验收：[OPEN_SOURCE_AUDIT.md](OPEN_SOURCE_AUDIT.md)
+- 本地验收产物策略：[validation_output/README.md](validation_output/README.md)
+- MJCF / GLB 资产策略：[assets/mjcf/README.md](assets/mjcf/README.md)、
+  [assets/glb/README.md](assets/glb/README.md)
+- 仿真检查：
+  [JOINT_SWEEP_CHECKLIST.md](examples/03_workflows/simulation/JOINT_SWEEP_CHECKLIST.md)
+
+## 常见问题与限制
+
+- 仅真机驱动支持 Linux SocketCAN；其他系统可运行无硬件测试和资产检查。
+- `Permission denied`：检查 CAN 接口权限，使用
+  `uv run robots-agilex-piper activate-devices` 激活设备。
+- 主从角色异常：先运行 `list-devices` 和 `check-role`，必要时经现场确认后使用
+  `set-role`。
+- 夹爪命令被拒绝或截取：确认值为两指总开口米值，不要直接使用旧毫米制数据。
+- Dora 集成模板依赖外部 Forge runtime，并要求设置 `FORGE_RUNTIME_ROOT` /
+  `FORGE_RUNTIME_BIN`。
+- CI 不连接真机；CAN、固件限位、急停、方向和生命周期位姿仍需现场验收。
+
+## 许可证
+
+本仓自有代码、配置和文档采用
+[Apache License 2.0](LICENSE)。机器人模型与衍生的 GLB/USD 保留各自上游
+MIT 许可；完整归属见 [NOTICE](NOTICE) 和
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。Apache-2.0 不授予
+AgileX、Piper 或其他第三方商标的使用权。

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """Agilex Piper 机械臂硬件驱动，实现 forge_robot.BaseRobotDriver 协议。"""
 
 from __future__ import annotations

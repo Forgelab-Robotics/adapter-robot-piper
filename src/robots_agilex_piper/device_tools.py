@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """Agilex Piper CAN 设备 CLI（list / activate / test），JSON 格式遵循 forge_robot.device_tools。"""
 
 from __future__ import annotations

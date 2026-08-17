@@ -12,9 +12,11 @@
 ## 运行（test_action_source）
 
 ```bash
-cd robots/agilex_piper/examples/03_workflows/simulation/mujoco_piper
+cd examples/03_workflows/simulation/mujoco_piper
+export FORGE_RUNTIME_ROOT=/absolute/path/to/forge-runtime
+export FORGE_RUNTIME_BIN="$FORGE_RUNTIME_ROOT/bin"
 dora build dataflow.test_action_source.yaml --uv
 dora run dataflow.test_action_source.yaml --uv
 ```
 
-仓内 `test_action_source.py` 使用 actuator-specific 合法范围：六轴按各自方向扫描，夹爪仅扫描 `0..0.105 m`，不会依赖 MuJoCo 饱和掩盖单位错误。运行前请确认工作区目录布局见仓库根 `README.md`。
+仓内 `test_action_source.py` 使用 actuator-specific 合法范围：六轴按各自方向扫描，夹爪仅扫描 `0..0.105 m`，不会依赖 MuJoCo 饱和掩盖单位错误。外部 runtime 路径约定见仓库根 `README.md`。

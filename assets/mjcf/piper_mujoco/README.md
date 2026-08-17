@@ -21,6 +21,10 @@
 
 https://github.com/google-deepmind/mujoco_menagerie/tree/main/agilex_piper
 
+本目录保留上游 MIT 许可与 `Copyright (c) 2024 RosenYin` 声明，完整
+文本见 [`LICENSE`](LICENSE)。本仓修改了夹爪控制语义、场景相机和部分路径；
+这些修改不改变上游资产的许可归属。
+
 ### 拓展资源
 
 1. Unimanual_PIPER_withTable: 单臂（带操作台）

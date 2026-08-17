@@ -10,7 +10,6 @@
 ## 打包
 
 ```bash
-cd robots/agilex_piper
 ./scripts/build_pyinstaller.sh
 ```
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
 """Agilex Piper sweep source with actuator-specific SI position ranges."""
 
 from __future__ import annotations

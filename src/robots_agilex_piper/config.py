@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """Agilex Piper 节点配置加载与校验。"""
 
 from __future__ import annotations

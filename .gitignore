@@ -5,6 +5,8 @@ out/
 # Local scratch files
 .tmp/
 *.log
+.DS_Store
+MUJOCO_LOG.TXT
 
 # Python caches
 __pycache__/
@@ -22,5 +24,9 @@ wheels/
 logs/
 **/logs/
 *.mcap
+
+# Local acceptance output; keep only its policy document
+validation_output/*
+!validation_output/README.md
 
 bin/

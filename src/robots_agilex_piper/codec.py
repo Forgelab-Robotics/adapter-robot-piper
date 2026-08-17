@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """Agilex Piper gripper conversions at the Forge/SDK boundary."""
 
 from __future__ import annotations

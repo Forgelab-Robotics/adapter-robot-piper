@@ -11,7 +11,7 @@
 | 资产 | 本仓路径 | 状态自检 |
 |------|-----------|----------|
 | MJCF + mesh | **`assets/mjcf/piper_mujoco/`** | 已落盘，仿真入口为 `scene.xml` |
-| GLB（Web/交付） | `assets/glb/piper.glb` | 已由 `robot_asset_pipeline` 生成 |
+| GLB（Web/交付） | `assets/glb/piper.glb` | 已由本仓 MJCF 转换生成 |
 | URDF | `assets/urdf/` | 当前目录预留 |
 
 ---
@@ -43,8 +43,8 @@
 
 **运行记录**：
 
-- 2026-05-12：激活 `forge_runtime/.venv` 后执行 `dora build dataflow.test_action_source.yaml --uv` 通过；随后使用 `timeout 12s dora run dataflow.test_action_source.yaml --uv` 做短时间 smoke test。`mujoco`、`task_robot`、`test_action_source`、`image_viewer`、`stream_viewer` 均 ready。MuJoCo 成功映射 7 个逻辑控制量与夹爪派生状态，`task_robot` 持续收发 `proprio_state`、`action`、`image/hand`、`image/top`、`image/angle`、`image/left_pillar`；四路图像 topic 约 26~30 FPS。`stream_viewer` 使用 `8771` 端口以避免与其它机器人示例冲突。记录人：陈若冰。
-- 2026-05-12：使用原生 MuJoCo viewer 手动调整控制量，`joint1` ~ `joint6` 与 `gripper` 夹爪均可正常响应，未见异常抖动、方向异常、明显穿模、飞出或模型爆炸。此记录早于总开口米值迁移。记录人：陈若冰。
+- 2026-05-12：激活 项目虚拟环境 后执行 `dora build dataflow.test_action_source.yaml --uv` 通过；随后使用 `timeout 12s dora run dataflow.test_action_source.yaml --uv` 做短时间 smoke test。`mujoco`、`task_robot`、`test_action_source`、`image_viewer`、`stream_viewer` 均 ready。MuJoCo 成功映射 7 个逻辑控制量与夹爪派生状态，`task_robot` 持续收发 `proprio_state`、`action`、`image/hand`、`image/top`、`image/angle`、`image/left_pillar`；四路图像 topic 约 26~30 FPS。`stream_viewer` 使用 `8771` 端口以避免与其它机器人示例冲突。验收记录。
+- 2026-05-12：使用原生 MuJoCo viewer 手动调整控制量，`joint1` ~ `joint6` 与 `gripper` 夹爪均可正常响应，未见异常抖动、方向异常、明显穿模、飞出或模型爆炸。此记录早于总开口米值迁移。验收记录。
 - 2026-07-30：交付 MJCF 已按总开口 gripper 语义整理（ctrl/force range、gear、joint limits/equality、中点 `0.0525 -> joint7=0.02625, joint8=-0.02625`）。迁移后的 GUI 动态与真机仍待复核。
 
 ---

@@ -17,8 +17,8 @@
 
 ## 检查记录
 
-- 2026-05-12：激活 `forge_runtime/.venv` 后运行 `mujoco_piper/dataflow.test_action_source.yaml` 做短时间自动 sweep smoke test。`dora build` 通过，`dora run` 中 `mujoco`、`task_robot`、`test_action_source`、`image_viewer`、`stream_viewer` 均 ready；MuJoCo 成功映射 7 个逻辑控制量与夹爪派生状态，`task_robot` 持续收发 `proprio_state`、`action`、`image/hand`、`image/top`、`image/angle`、`image/left_pillar`。记录人：陈若冰。
-- 2026-05-12：使用原生 MuJoCo viewer 加载 `assets/mjcf/piper_mujoco/scene.xml` 手动调整控制量。`joint1` ~ `joint6` 与 `gripper` 夹爪均可正常响应，未见异常抖动、方向异常、明显穿模、飞出或模型爆炸。此记录早于总开口米值迁移。记录人：陈若冰。
+- 2026-05-12：激活 项目虚拟环境 后运行 `mujoco_piper/dataflow.test_action_source.yaml` 做短时间自动 sweep smoke test。`dora build` 通过，`dora run` 中 `mujoco`、`task_robot`、`test_action_source`、`image_viewer`、`stream_viewer` 均 ready；MuJoCo 成功映射 7 个逻辑控制量与夹爪派生状态，`task_robot` 持续收发 `proprio_state`、`action`、`image/hand`、`image/top`、`image/angle`、`image/left_pillar`。验收记录。
+- 2026-05-12：使用原生 MuJoCo viewer 加载 `assets/mjcf/piper_mujoco/scene.xml` 手动调整控制量。`joint1` ~ `joint6` 与 `gripper` 夹爪均可正常响应，未见异常抖动、方向异常、明显穿模、飞出或模型爆炸。此记录早于总开口米值迁移。验收记录。
 - 2026-07-30：交付 MJCF 已按总开口 gripper 语义整理；仓内 sweep source 的夹爪范围更新为 `0..0.105 m`。尚未重跑迁移后的 Dora workflow 或原生 GUI 动态观察。
 
 ## 后续真机对照

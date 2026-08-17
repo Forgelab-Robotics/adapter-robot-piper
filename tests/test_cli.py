@@ -1,5 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+
 from __future__ import annotations
 
+from importlib.metadata import version
 import unittest
 from unittest.mock import patch
 
@@ -13,7 +16,7 @@ class CliTest(unittest.TestCase):
             result = CliRunner().invoke(app, ["--version"])
 
         self.assertEqual(result.exit_code, 0)
-        self.assertEqual(result.output, "agilex-piper 1.1.3\n")
+        self.assertEqual(result.output, f"agilex-piper {version('agilex-piper')}\n")
         run_node.assert_not_called()
 
 

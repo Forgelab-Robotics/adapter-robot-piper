@@ -35,16 +35,16 @@
         }
     }
     defaultPrim = "PIPER"
-    doc = """Generated from Composed Stage of root layer /tmp/tmptc_8i7a8/PIPER.usdc
+    doc = """Generated from the repository's AgileX Piper MJCF asset
 
 
-Generated from Composed Stage of root layer /tmp/mjcf_import_PIPER_wi_miy4w/usdex_PIPER/PIPER.usdc
+Generated from the repository's AgileX Piper MJCF asset
 
 
-Generated from Composed Stage of root layer /tmp/mjcf_import_PIPER_wi_miy4w/temp_PIPER/PIPER.usd
+Generated from the repository's AgileX Piper MJCF asset
 
 
-Generated from Composed Stage of root layer /home/exai/robots_assets/Piper/PIPER/payloads/base.usd
+Generated from the repository's AgileX Piper MJCF asset
 """
     kilogramsPerUnit = 1
     metersPerUnit = 1

@@ -1,5 +1,6 @@
 # Agilex Piper master 模式配置示例
-# 用于只读主臂状态，典型来源：forge_runtime/examples/real_record/agilex_piper_master.yaml
+# 复制后按实际设备修改；示例值不代表硬件验收结果。
+# 用于只读主臂状态
 
 port: can1
 is_follower: false

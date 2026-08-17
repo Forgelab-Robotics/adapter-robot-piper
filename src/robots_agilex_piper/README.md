@@ -4,19 +4,23 @@
 
 ## 位置
 
-本实现已迁入机器人交付仓：
+本实现位于：
 
-`robots/agilex_piper/src/robots_agilex_piper/`
+`src/robots_agilex_piper/`
 
-来源为工作区内 `forge_robots/packages/piper/`。
+源码采用 Apache-2.0，运行时通过 PyPI 安装 `forge-common`、
+`forge-msgs` 与 `forge-robot`。
 
 ## 配置
 
-复制 `config.example.yaml` 为现场配置并修改。配置来源（优先级从高到低）：
+从仓库根目录复制 `config/agilex_piper_slave.yaml.example` 为现场配置并修改。
+配置来源（优先级从高到低）：
 
 - `--config config/agilex_piper_slave.yaml.example`
 - 环境变量 `AGILEX_PIPER_NODE_CONFIG`
-- dataflow 节点参数中的 `config` / `config_path`
+
+Dataflow 通过节点 `args: --config <path>` 传入配置。配置仅在启动时读取，修改后
+需重启节点。
 
 本仓同时提供：
 
@@ -54,7 +58,6 @@ path: ../../../src/robots_agilex_piper/main.py
 示例：
 
 ```bash
-cd robots/agilex_piper
 uv run robots-agilex-piper list-devices --json
 uv run robots-agilex-piper check-role can0 can1 --json
 uv run robots-agilex-piper test can0 --duration 15
@@ -63,7 +66,6 @@ uv run robots-agilex-piper test can0 --duration 15
 ## 打包
 
 ```bash
-cd robots/agilex_piper
 ./scripts/build_pyinstaller.sh
 ```
 
