@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[test]"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Import public Forge packages
+        run: python -c "import forge_common, forge_msgs, forge_robot"
+      - name: Load MuJoCo model
+        run: >-
+          python -c "import mujoco;
+          model=mujoco.MjModel.from_xml_path('assets/mjcf/piper_mujoco/scene.xml');
+          print(f'MuJoCo model loaded: nq={model.nq}, nu={model.nu}')"
+      - name: License and public-tree checks
+        run: |
+          test -f LICENSE
+          test -f NOTICE
+          test -f THIRD_PARTY_NOTICES.md
+          test -f assets/mjcf/piper_mujoco/LICENSE
+          ! git grep -n -E 'gitlab\.ex-ai\.cn|meta-emt|/home/exai|/Users/|forge_robots|robot-mj-model|robot_asset_pipeline' -- ':!.github/workflows/ci.yml'
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Scan publishable text for secrets
+        run: |
+          python -m pip install detect-secrets==1.5.0
+          detect-secrets scan --all-files --exclude-files '^assets/(glb|mjcf|urdf)/' > /tmp/secrets.json
+          python - <<'PY'
+          import json
+          with open("/tmp/secrets.json", encoding="utf-8") as stream:
+              findings = json.load(stream).get("results", {})
+          if findings:
+              raise SystemExit(f"Potential secrets detected: {findings}")
+          PY

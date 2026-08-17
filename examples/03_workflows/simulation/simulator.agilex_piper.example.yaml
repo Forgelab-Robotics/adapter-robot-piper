@@ -1,0 +1,14 @@
+# Agilex Piper + Forge runtime MuJoCo 节点 — 配置骨架（仅供裁剪参考）
+# 完整仿真配置见同目录 mujoco_piper/simulator.yaml。
+
+model_path: ../../../assets/mjcf/piper_mujoco/scene.xml
+control_hz: 50
+
+# 完整配置中的 gripper 必须使用 unit: meters、state_expr: diff、state_scale: 1.0。
+# 其值表示两指总开口 0..0.105 m，而不是旧毫米值。
+joints: []
+
+robots:
+  - id: robot_0
+    prefix: item_1/
+    joints: []

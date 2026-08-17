@@ -1,0 +1,36 @@
+# 仿真 + 推理 + 录制 示例
+# 运行：在 examples/03_workflows/sim_teleop 目录下
+#   dora build dataflow.yaml --uv && dora run dataflow.yaml --uv
+#
+# 数据流：agilex_piper_master(state) 驱动 mujoco；task_robot 将 master_state 转为 action 供 mcap_recorder 录制。
+# 录制由 recorder_control 控制：首 tick 发 start（可带路径），第 N 个 tick 发 stop；mcap_recorder 常驻可重复录制，dataflow 用 Ctrl+C 结束。
+
+nodes:
+  - id: mujoco
+    path: ${FORGE_RUNTIME_BIN}/mujoco_sim
+    inputs:
+      tick: dora/timer/millis/20
+      robot_0/master_state: agilex_piper_master/state
+    outputs:
+      - proprio_state
+      - image/hand
+      - image/top
+      - image/angle
+      - image/left_pillar
+    args: --config simulator.yaml
+
+  - id: image_viewer
+    path: ${FORGE_RUNTIME_BIN}/image_viewer
+    inputs:
+      image/hand: mujoco/image/hand
+      image/top: mujoco/image/top
+      image/angle: mujoco/image/angle
+      image/left_pillar: mujoco/image/left_pillar
+  
+  - id: agilex_piper_master
+    path: ../../../src/robots_agilex_piper/main.py
+    inputs:
+      tick: dora/timer/millis/20
+    outputs:
+      - state
+    args: --config agilex_piper_master.yaml

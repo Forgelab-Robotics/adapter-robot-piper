@@ -1,0 +1,5 @@
+# Agilex Piper master 模式配置示例
+# 用于只读主臂状态
+
+port: can1
+is_follower: false

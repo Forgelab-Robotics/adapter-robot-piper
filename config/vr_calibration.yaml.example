@@ -1,0 +1,36 @@
+# VR / 同构标定参数模板（示例字段名可按项目统一命名修改）
+# 填写说明见根目录 README「交付与验收」
+
+robot: piper
+
+# Modified DH（MDH）或与控制栈一致的 DH：按列填写每行一个关节，单位与文档一致（通常为弧度/mm）
+mdh:
+  alpha: []   # α_i
+  a: []       # a_i
+  d: []       # d_i
+  theta_offset: []  # 零位偏置
+
+# 手柄/头显坐标系到机器人基座的旋转映射（3×3 或四元数 wxyz，与实现约定一致）
+rotation_controller_to_base:
+  format: matrix3x3  # or quaternion_wxyz
+  value: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+
+# 位移缩放（同构 / VR 平移）
+scale:
+  translation: 1.0
+
+# VR / 同构控制若输出 Forge gripper，语义必须是两指总开口（米），范围 0..0.105。
+# 例如半开为 0.0525；不要输出旧毫米值 52.5。
+gripper:
+  closed: 0.0
+  open: 0.105
+
+# 末端外参：工具坐标系相对法兰（t_ee 或 T_flange_ee）
+t_ee:
+  translation: [0.0, 0.0, 0.0]
+  rotation_wxyz: [1.0, 0.0, 0.0, 0.0]
+
+meta:
+  calibrated_at: ""
+  operator: ""
+  notes: "来源：出厂文档 / 现场标定 / 光学追踪，附上报告路径"

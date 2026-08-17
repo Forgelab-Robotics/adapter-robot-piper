@@ -1,0 +1,49 @@
+[project]
+name = "agilex-piper"
+version = "1.1.3"
+description = "Agilex Piper Robot configuration and teleop workflow"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]
+authors = [{ name = "PhyAgentOS Contributors" }]
+maintainers = [{ name = "PhyAgentOS Contributors" }]
+classifiers = [
+	"Development Status :: 4 - Beta",
+	"Intended Audience :: Developers",
+	"License :: OSI Approved :: Apache Software License",
+	"Operating System :: POSIX :: Linux",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.12",
+	"Topic :: Scientific/Engineering",
+]
+dependencies = [
+	"dora-rs>=0.4.1",
+	"typer>=0.25.1",
+	"forge-common>=1.0.0,<2",
+	"forge-msgs>=1.0.0,<2",
+	"forge-robot>=1.0.0,<2",
+	"piper-sdk==0.6.2",
+	"pyyaml>=6.0",
+	"python-can>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Forgelab-Robotics/adapter-robot-piper"
+Repository = "https://github.com/Forgelab-Robotics/adapter-robot-piper.git"
+Issues = "https://github.com/Forgelab-Robotics/adapter-robot-piper/issues"
+
+[project.scripts]
+robots-agilex-piper = "robots_agilex_piper.main:main"
+robots_agilex_piper = "robots_agilex_piper.main:main"
+
+[project.optional-dependencies]
+pyinstaller = ["pyinstaller>=6.0"]
+test = ["mujoco>=3.3.0", "pytest>=8.0"]
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "robots_agilex_piper"

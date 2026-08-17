@@ -1,0 +1,16 @@
+# Agilex Piper follower 模式配置示例
+# 用于接收 action / master_state 并驱动从臂
+
+port: can0
+is_follower: true
+# debug: true
+
+# 首次真机采集使用受限硬件速度；连接固定回 initial，关闭/断开固定回 reset。
+motion_speed_percent: 30
+
+# 生命周期位姿配置。关节单位为弧度，gripper 为两指总开口（米）；未写关节使用默认值。
+# positions:
+#   initial:
+#     joint2: 0.5
+#   reset:
+#     joint5: 0.3

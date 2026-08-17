@@ -1,0 +1,55 @@
+# MuJoCo 节点配置示例
+# 复制为 config.yaml 并根据实际环境修改
+# 模型使用 attach prefix="item_1/"，故 robot 需配置 prefix 以便 MuJoCo 节点正确查找
+#
+# 时间与频率：control_hz 为控制周期频率，需与 dataflow 中 mujoco 的 tick 间隔一致（如 50Hz → 20ms）
+
+model_path: ../../../assets/mjcf/piper_mujoco/scene.xml
+
+# 控制周期频率（Hz），与 dataflow 中 tick: dora/timer/millis/20 对应 50Hz
+control_hz: 50
+
+# 与 policy.yaml 一致：每个关节的 name / mode / unit（gripper 为两指总开口 meters）
+joints:
+  - name: joint1
+    mode: position
+    unit: radians
+  - name: joint2
+    mode: position
+    unit: radians
+  - name: joint3
+    mode: position
+    unit: radians
+  - name: joint4
+    mode: position
+    unit: radians
+  - name: joint5
+    mode: position
+    unit: radians
+  - name: joint6
+    mode: position
+    unit: radians
+  - name: gripper
+    mode: prismatic
+    unit: meters
+    # gripper 为两指总开口：
+    #   value = qpos[joint7] - qpos[joint8]  （joint8 = -joint7 时等于 2 * joint7）
+    state_from_joints: ["joint7", "joint8"]
+    state_expr: diff
+    state_scale: 1.0
+
+robots:
+  - id: robot_0
+    prefix: item_1/
+    joints: ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6", "gripper"]
+
+# 相机输出配置：MuJoCo 模型中的 camera 名称 -> output_id 或 { output, fps }
+# 无 fps 时随 tick 输出。camera 名称需与模型 XML 中 camera 的 name 属性一致
+image_format: raw
+image_jpeg_quality: 90
+
+image_forward:
+  item_1/wrist_cam: { output: "image/hand", fps: 50, width: 640, height: 480 }
+  top: { output: "image/top", fps: 50, width: 640, height: 480 }
+  angle: { output: "image/angle", fps: 50, width: 640, height: 480 }
+  left_pillar: { output: "image/left_pillar", fps: 50, width: 640, height: 480 }

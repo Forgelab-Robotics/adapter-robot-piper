@@ -1,0 +1,8 @@
+# Agilex Piper 从站配置（real_playback 示例）
+# 回放时由 mcap_playback 输出 master_state，本节点订阅并驱动真机。
+# 请按现场 CAN 端口修改 port。
+# debug 可以打开以观察 master_state 和下发到真机的 action（默认 false）。
+
+port: can0
+is_follower: true
+debug: true
