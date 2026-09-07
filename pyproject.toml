@@ -22,7 +22,7 @@ dependencies = [
 	"dora-rs>=0.4.1",
 	"typer>=0.25.1",
 	"forge-common>=1.0.0,<2",
-	"forge-msgs>=1.0.0,<2",
+	"forge-msgs>=1.0.0,<3",
 	"forge-robot>=1.0.0,<2",
 	"piper-sdk==0.6.2",
 	"pyyaml>=6.0",
