@@ -1,0 +1,21 @@
+{
+  "repository": "adapter-robot-piper",
+  "node_candidate_version": "2.0.0",
+  "baseline_commit": "25e824db5ac7a2ab2510b28b0165600ddf73a6f0",
+  "changes": [
+    "Upgrade Forge Robot/Common/Msgs and Dora dependencies.",
+    "Synchronize English/Chinese root README guidance and frozen dependencies."
+  ],
+  "software_tests": {
+    "log": "tests.log",
+    "summary": [
+      "56 passed, 6 warnings, 39 subtests passed in 5.40s"
+    ]
+  },
+  "dora_cli": "1.0.1",
+  "runtime_records": [],
+  "runtime_missing": "Native CAN device is unavailable; hardware Dora and Gateway chain are pending.",
+  "acceptance": "Pending final platform artifacts, applicable hardware/model execution and rollback/sustained-run gates.",
+  "pillow_dependency": "Node locks currently resolve published Forge Msgs 2.0.0. Security audit remains dependent on Forge PR #3 and a published security-fixed Msgs release; no vulnerability suppression was added.",
+  "gitlab_synchronization": "Not started; follows full acceptance."
+}
