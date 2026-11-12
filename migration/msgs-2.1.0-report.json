@@ -90,8 +90,7 @@
       "forge-msgs": "2.1.0",
       "pillow": "13.0.0",
       "dora-rs": "1.0.1"
-    },
-    "log": "msgs-2.1.0-logs/tests.log"
+    }
   },
   "dependency_audit": {
     "repo": "adapter-robot-piper",
@@ -140,7 +139,7 @@
         "2026-11-12T08:11:55.241811Z ERROR node_failure: dora_daemon::spawn::prepared: node exited with error: ExitCode(1) node_id=gateway dataflow_id=01a1ced0-369f-765e-b310-e06afa48a7ff",
         "16:11:55 ERROR  gateway: daemon exited with code 1. This error occurred because node `target` exited before connecting to dora."
       ],
-      "log": "msgs-2.1.0-logs/runtime-blocked/robots-agilex-piper/chain/dora.log"
+      "local_evidence": "Full original Dora log is retained under validation/downstream-msgs210-20261112/runtime-blocked/robots-agilex-piper/chain/dora.log"
     },
     {
       "repo": "adapter-robot-piper",
@@ -179,10 +178,11 @@
         "2026-11-12T08:11:54.922894Z ERROR node_failure: dora_daemon::spawn::prepared: node exited with error: ExitCode(1) node_id=target dataflow_id=01a1ced0-369f-7a3c-b007-61e1edde7e16",
         "16:11:54 ERROR  target: daemon exited with code 1 with stderr output:"
       ],
-      "log": "msgs-2.1.0-logs/runtime-blocked/robots-agilex-piper/single/dora.log"
+      "local_evidence": "Full original Dora log is retained under validation/downstream-msgs210-20261112/runtime-blocked/robots-agilex-piper/single/dora.log"
     }
   ],
   "remaining": "Applicable actual hardware/model, final supported-platform artifacts, sustained run and rollback acceptance remain pending.",
   "acceptance": "Pending; software checks, fake/dummy backends and negative prerequisite records are scoped evidence only. Every new multi-node graph contains adapter-forge-gateway.",
-  "gitlab_sync": "Not performed; follows completed acceptance."
+  "gitlab_sync": "Not performed; follows completed acceptance.",
+  "log_publication": "Original logs remain in the local validation workspace. This public report publishes reviewed commands, outcomes, assertions and limitations only."
 }
